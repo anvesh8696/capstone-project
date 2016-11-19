@@ -3,6 +3,7 @@ import { handleActions } from 'redux-actions';
 // ------------------------------------
 // Constants
 // ------------------------------------
+export const FETCH_USER = 'FETCH_USER';
 
 // ------------------------------------
 // Actions
@@ -27,6 +28,7 @@ const initialState = {
 // Reducer
 // ------------------------------------
 export const landingReducer = handleActions({
+  [`${FETCH_USER}_SUCCESS`]: (state, action) => ({...state, user: action.payload}),
 }, initialState);
 
 export default landingReducer;

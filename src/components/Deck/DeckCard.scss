@@ -1,0 +1,58 @@
+
+@mixin suite {
+  &:before {
+    position: absolute;
+    font-size: 35px;
+    left: 5px;
+    top: 5px;
+  }
+  &:after {
+    position: absolute;
+    font-size: 35px;
+    right: 5px;
+    bottom: 5px;
+  }
+}
+
+@mixin suiteFace($content, $color) {
+  &:before,&:after {
+    content: $content;
+    color: $color;
+  }
+}
+
+.card {
+  border: 8px solid white;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  box-sizing: border-box;
+  width: 150px;
+  height: 220px;
+  position: relative;
+  user-select: none;
+}
+
+.card p {
+  text-align: center;
+  font: 100px/200px Georgia, Times New Roman, serif;
+}
+
+.suitclub, .suitspade, .suitdiamond, .suitheart {
+  @include suite;
+}
+
+.suitclub {
+  @include suiteFace("♣", black);
+}
+
+.suitspade {
+  @include suiteFace("♠", black);
+}
+
+.suitdiamond {
+  @include suiteFace("♦", red);
+}
+
+.suitheart {
+  @include suiteFace("♥", red);
+}
