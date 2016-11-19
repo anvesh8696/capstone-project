@@ -20,6 +20,7 @@ export const actions = {
 // Initial State
 // ------------------------------------
 const initialState = {
+  user: {}
 };
 
 // ------------------------------------

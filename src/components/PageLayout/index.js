@@ -34,15 +34,15 @@ export default function (Wrapped){
           { href:'#/', label: 'Home', icon: 'room', active:(pathname == '/')}
         ];
         return (
-          <Layout theme={theme}>
-            <NavDrawer active={this.state.drawerActive}
-              pinned={this.state.drawerPinned}
-              permanentAt="md"
-              onOverlayClick={ this.toggleDrawerActive }>
-              <Navigation type="vertical" routes={routes} className={theme.nav} />
+          <Layout theme = {theme}>
+            <NavDrawer active = {this.state.drawerActive}
+              pinned = {this.state.drawerPinned}
+              permanentAt = "md"
+              onOverlayClick = { this.toggleDrawerActive }>
+              <Navigation type = "vertical" routes = {routes} className = {theme.nav} />
             </NavDrawer>
             <Wrapped
-              toggleDrawerActive={this.toggleDrawerActive}
+              toggleDrawerActive = {this.toggleDrawerActive}
             />
           </Layout>
         );

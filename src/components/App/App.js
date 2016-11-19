@@ -15,8 +15,8 @@ export default class App extends Component {
   render() {
     return (
       <Routes
-        store={store}
-        history={history}
+        store = {store}
+        history = {history}
       />
     );
   }

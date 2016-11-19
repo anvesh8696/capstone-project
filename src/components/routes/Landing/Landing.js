@@ -15,8 +15,8 @@ class Landing extends Component {
       const { theme } = this.props;
       return (
         <Panel>
-          <AppBar title={'Home'} leftIcon={'menu'} onLeftIconClick={this.props.toggleDrawerActive} />
-          <div className={theme.page}>
+          <AppBar title = {'Home'} leftIcon = {'menu'} onLeftIconClick = {this.props.toggleDrawerActive} />
+          <div className = {theme.page}>
             Hello Home Page
           </div>
         </Panel>

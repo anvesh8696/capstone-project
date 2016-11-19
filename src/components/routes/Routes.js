@@ -24,7 +24,7 @@ export default class Routes extends Component {
   renderRoutes(){
     return (
       <Router history = { this.props.history }>
-        <Route path="/" component = { PageLayout(Landing) } />
+        <Route path = "/" component = { PageLayout(Landing) } />
       </Router>
     );
   }
@@ -36,7 +36,7 @@ export default class Routes extends Component {
   render() {
     let content = this.state.ready ? this.renderRoutes() : this.renderLoading();
     return (
-      <Provider store={this.props.store}>
+      <Provider store = {this.props.store}>
         {content}
       </Provider>
     );
