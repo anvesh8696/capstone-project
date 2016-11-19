@@ -1,0 +1,9 @@
+@import "~react-toolbox/lib/colors";
+@import "~react-toolbox/lib/globals";
+
+$color-primary: $palette-blue-500;
+$color-primary-dark: $palette-blue-700;
+
+$navigation-drawer-desktop-width: 3 * $standard-increment-desktop;
+$navigation-drawer-mobile-width: $navigation-drawer-desktop-width;
+$navigation-drawer-max-desktop-width: 30 * $unit;
