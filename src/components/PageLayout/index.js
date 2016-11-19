@@ -1,10 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 import { Layout, NavDrawer, Navigation } from 'react-toolbox';
 import { themr } from 'react-css-themr';
+import Empty from './Empty';
 import theme from './theme.scss';
-import navTheme from './Nav.scss';
 
-export default function (Wrapped){
+export default function (Wrapped, Sidebar){
   
   @themr('PageLayout', theme)
   class PageLayout extends Component {
@@ -31,19 +31,21 @@ export default function (Wrapped){
         const { pathname } = this.props.location;
         const { theme } = this.props;
         const routes = [
-          { href:'#/', label: 'Home', icon: 'room', active:(pathname == '/')}
+          { href:'#/', label: 'Home', icon: 'room', active:(pathname == '/')},
+          { href:'#/editor', label: 'Editor', icon: 'room', active:(pathname == '/editor')}
         ];
         return (
-          <Layout theme = {theme}>
-            <NavDrawer active = {this.state.drawerActive}
-              pinned = {this.state.drawerPinned}
-              permanentAt = "md"
-              onOverlayClick = { this.toggleDrawerActive }>
-              <Navigation type = "vertical" routes = {routes} className = {theme.nav} />
+          <Layout theme={theme}>
+            <NavDrawer active={this.state.drawerActive}
+              pinned={this.state.drawerPinned}
+              permanentAt="md"
+              onOverlayClick={ this.toggleDrawerActive }>
+              <Navigation type="vertical" routes={routes} className={theme.nav} />
             </NavDrawer>
             <Wrapped
-              toggleDrawerActive = {this.toggleDrawerActive}
+              toggleDrawerActive={this.toggleDrawerActive}
             />
+            { Sidebar ? <Sidebar /> : <Empty /> }
           </Layout>
         );
       }

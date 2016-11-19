@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { AppBar, Panel } from 'react-toolbox';
+import { AppBar, Panel, Sidebar } from 'react-toolbox';
 import { themr } from 'react-css-themr';
 import defaultTheme from './Landing.scss';
 import Deck from 'components/Deck/Deck';
@@ -16,10 +16,8 @@ class Landing extends Component {
       const { theme } = this.props;
       return (
         <Panel>
-          <AppBar title = {'Home'} leftIcon = {'menu'} onLeftIconClick = {this.props.toggleDrawerActive} />
-          <div className = {theme.page}>
-            <Deck />
-          </div>
+          <AppBar title={'Home'} leftIcon={'menu'} onLeftIconClick={this.props.toggleDrawerActive} />
+          <div className={theme.page} />
         </Panel>
       );
     }

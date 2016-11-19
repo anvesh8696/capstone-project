@@ -19,7 +19,7 @@ export default class DeckCard extends Component {
   render() {
     const cardClass = classNames(theme.card, theme[`suit${this.props.suit}`]);
     return (
-      <div className = {cardClass}>
+      <div className={cardClass}>
         <p>{this.props.value}</p>
       </div>
     );

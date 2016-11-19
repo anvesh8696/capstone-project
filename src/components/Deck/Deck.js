@@ -12,11 +12,11 @@ export default class Deck extends Component {
   
   render() {
     return (
-      <div className = {theme.deck}>
+      <div className={theme.deck}>
         <DeckCard />
-        <DeckCard suit = {'spade'} value = {'J'}/>
-        <DeckCard suit = {'heart'} value = {'Q'}/>
-        <DeckCard suit = {'club'} value = {'K'}/>
+        <DeckCard suit={'spade'} value={'J'}/>
+        <DeckCard suit={'heart'} value={'Q'}/>
+        <DeckCard suit={'club'} value={'K'}/>
       </div>
     );
   }

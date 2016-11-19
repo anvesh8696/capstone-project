@@ -1,14 +1,16 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import { Router, Route } from 'react-router';
+import { Provider } from 'react-redux';
 import PageLayout from 'components/PageLayout';
 import Landing from 'components/routes/Landing';
-import { Provider } from 'react-redux';
+import Editor from 'components/routes/Editor';
+import EditorSideBar from 'components/routes/Editor/EditorSideBar';
 
 export default class Routes extends Component {
   
   static propTypes = {
-    store: React.PropTypes.object.isRequired,
-    history: React.PropTypes.object.isRequired
+    store: PropTypes.object.isRequired,
+    history: PropTypes.object.isRequired
   }
   
   state = {
@@ -23,8 +25,9 @@ export default class Routes extends Component {
   
   renderRoutes(){
     return (
-      <Router history = { this.props.history }>
-        <Route path = "/" component = { PageLayout(Landing) } />
+      <Router history={ this.props.history }>
+        <Route path="/" component={ PageLayout(Landing, null) } />
+        <Route path="/editor" component={ PageLayout(Editor, EditorSideBar) } />
       </Router>
     );
   }
@@ -36,7 +39,7 @@ export default class Routes extends Component {
   render() {
     let content = this.state.ready ? this.renderRoutes() : this.renderLoading();
     return (
-      <Provider store = {this.props.store}>
+      <Provider store={this.props.store}>
         {content}
       </Provider>
     );
