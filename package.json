@@ -11,7 +11,6 @@
     "test": "karma start --single-run --no-auto-watch karma.config.js",
     "test:watch": "karma start --auto-watch --no-single-run karma.config.js",
     "deploy:github": "git push origin `git subtree split --prefix dist master`:gh-pages --force",
-    "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "lint:style": "stylelint \"src/**/*.scss\" --syntax scss",
     "lint:staged": "lint-staged"
@@ -79,6 +78,7 @@
     "react-addons-transition-group": "^15.4.0",
     "react-css-themr": "^1.4.1",
     "react-hot-loader": "^1.1.5",
+    "react-motion": "^0.4.5",
     "react-redux": "^4.4.6",
     "react-router-redux": "^4.0.7",
     "react-toolbox": "^1.2.5",
