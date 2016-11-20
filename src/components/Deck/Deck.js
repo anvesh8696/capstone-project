@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { themr } from 'react-css-themr';
 import theme from './Deck.scss';
 import DeckCard from './DeckCard';
+import { sortBy, forEach } from 'lodash';
 
 @themr('Deck', theme)
 export default class Deck extends Component {
@@ -12,18 +13,29 @@ export default class Deck extends Component {
   
   state = {
     open: false,
-    cards: this.createCards()
+    suits: ['spade', 'heart', 'club', 'diamond'],
+    types: ['A','2','3','4','5','6','7','8','9','10','J','Q','K'],
+    cards: []
   }
   
-  createCards(){
-    let s=['spade', 'heart', 'club', 'diamond'];
-    let v=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  componentDidMount(){
+    this.setState({cards: this.createCards()});
+  }
+  
+  createCards = () => {
+    const {suits, types} = this.state;
     let c=[];
-    let t = s.length * v.length;
+    let t = suits.length * types.length;
     for(let i=0; i<t; i++){
       c.push({
-        suit: s[Math.floor(i/v.length)],
-        value: v[i%(v.length)] 
+        key: 'key_' + i,
+        suit: suits[Math.floor(i / types.length)],
+        value: types[i % types.length],
+        so: i,
+        x: 0,
+        y: 0,
+        scale: 0.5,
+        angle: 0
       });
     }
     return c;
@@ -31,6 +43,13 @@ export default class Deck extends Component {
   
   handleMouseDown = () => {
     this.setState({open: !this.state.open});
+    
+    if(this.state.open){
+      this.resetPositions();
+    }else{
+      // this.sortPositions();
+      this.centroidPositions(this.centerX(), this.centerY(), 100);
+    }
   }
   
   randomInt(min, max){
@@ -47,6 +66,71 @@ export default class Deck extends Component {
     return this.randomInt(0, h - 220);
   }
   
+  centerX = () => {
+    return this.refs.node.clientWidth / 2;
+  }
+  
+  centerY = () => {
+    return this.refs.node.clientHeight / 2;
+  }
+  
+  resetPositions(){
+    const { cards } = this.state;
+    let newCards = forEach(cards, (c) => {
+      c.x = 0;
+      c.y = 0;
+      c.angle = 0;
+    });
+    this.setState({cards: newCards});
+  }
+  
+  randomPositions() {
+    const { cards } = this.state;
+    let newCards = forEach(cards, (c) => {
+      c.x = this.randomX();
+      c.y = this.randomY();
+      c.angle = 0;
+    });
+    this.setState({cards: newCards});
+  }
+  
+  sortPositions(){
+    const {cards, types} = this.state;
+    let col, row;
+    let newCards = forEach(sortBy(cards, 'so'), (c, i) => {
+      col = i % types.length;
+      row = Math.floor(i / types.length);
+      c.x = col * (150 * c.scale);
+      c.y = row * (220 * c.scale);
+      c.angle = 0;
+    });
+    this.setState({cards: newCards});
+  }
+  
+  centroidPositions(cx=0, cy=0, r=50){
+    const {cards} = this.state;
+    let step = 360 / cards.length;
+    let a, dy, dx;
+    let newCards = forEach(sortBy(cards, 'so'), (c, i) => {
+      a = step * i * (Math.PI/180);
+      c.x = cx + r * Math.cos(a);
+      c.y = cy + r * Math.sin(a);
+      dy = cy - c.y;
+      dx = cx - c.x;
+      c.angle = -90 + (Math.atan2(dy, dx) * 180 / Math.PI);
+    });
+    this.setState({cards: newCards});
+  }
+  
+  renderCards(cards) {
+    return cards.map(c => {
+    return (
+      <DeckCard
+        {...c}
+        />
+    )});
+  }
+  
   render() {
     const { cards } = this.state;
     return (
@@ -55,16 +139,9 @@ export default class Deck extends Component {
           onMouseDown={this.handleMouseDown}>
           Switch
         </button>
-         {
-          cards.map(c => {
-          return (
-            <DeckCard
-              x={this.state.open ? this.randomX() : 0}
-              y={this.state.open ? this.randomY() : 0}
-              {...c}
-              />
-          )})
-         }
+        {
+          this.renderCards(cards)
+        }
       </div>
     );
   }
