@@ -4,11 +4,13 @@ import thunkMiddleware from 'redux-thunk';
 import promiseMiddleware from 'redux-promise';
 import createLogger from 'redux-logger';
 import landingReducer from 'components/routes/Landing/LandingModule';
+import editorReducer from 'components/routes/Editor/EditorModule';
 
 const RootReducer = (asyncReducers) => {
   return combineReducers({
     routing: routerReducer,
     landing: landingReducer,
+    editor: editorReducer,
     ...asyncReducers
   });
 };

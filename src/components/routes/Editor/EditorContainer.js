@@ -3,6 +3,7 @@ import Editor from './Editor';
 
 const mapStateToProps = (state) => {
   return {
+    deckAction: state.editor.deckAction
   };
 };
 

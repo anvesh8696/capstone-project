@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import PageLayout from 'components/PageLayout';
 import Landing from 'components/routes/Landing';
 import Editor from 'components/routes/Editor';
-import EditorSideBar from 'components/routes/Editor/EditorSideBar';
+import EditorSideBar from 'components/routes/Editor/EditorSideBarContainer';
 
 export default class Routes extends Component {
   

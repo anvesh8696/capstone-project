@@ -23,18 +23,55 @@
 
 .move {
   position: absolute;
+  transform-origin: 50% 100%;
+}
+
+.inner {
+  position: relative;
+  width: 150px;
+  height: 220px;
 }
 
 .card {
+  backface-visibility: hidden;
   background-color: white;
   border: 8px solid white;
   border-radius: 10px;
   box-shadow: 0 1px 3px rgba(0,0,0,.25);
   box-sizing: border-box;
-  width: 150px;
-  height: 220px;
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   user-select: none;
+  transition: all .4s ease-in-out;
+  transform: rotateY(0);
+  cursor: default;
+}
+
+.front {
+  @extend .card;
+  transform: rotateY(0);
+  z-index: 100;
+}
+
+.back {
+  @extend .card;
+  background: #80868d;
+  transform: rotateY(-180deg);
+  z-index: 1;
+}
+
+.flipped {
+  &.front{
+    transform: rotateY(180deg);
+    z-index: 1;
+  }
+  &.back {
+    transform: rotateY(0);
+    z-index: 100;
+  }
 }
 
 .card p {
