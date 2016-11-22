@@ -23,13 +23,13 @@
 
 .move {
   position: absolute;
-  transform-origin: 50% 100%;
 }
 
 .inner {
-  position: relative;
+  position: absolute;
   width: 150px;
   height: 220px;
+  transform: translate(-50%, -50%);
 }
 
 .card {
@@ -77,6 +77,24 @@
 .card p {
   text-align: center;
   font: 100px/200px Georgia, Times New Roman, serif;
+}
+
+.origin {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: red;
+  position: absolute;
+  z-index: 200;
+}
+
+.originb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: blue;
+  position: absolute;
+  z-index: 200;
 }
 
 .suitclub, .suitspade, .suitdiamond, .suitheart {

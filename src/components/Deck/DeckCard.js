@@ -9,8 +9,10 @@ export const cardDefaults = {
   value: '10',
   x: 0,
   y: 0,
+  z: 0,
   scale: 0.5,
   angle: 0,
+  order: 1,
   flipped: false
 };
 
@@ -23,22 +25,25 @@ export default class DeckCard extends Component {
     value: PropTypes.string.isRequired,
     x: PropTypes.number.isRequired,
     y: PropTypes.number.isRequired,
+    z: PropTypes.number.isRequired,
     scale: PropTypes.number.isRequired,
     angle: PropTypes.number.isRequired,
+    order: PropTypes.number.isRequired,
     flipped: PropTypes.bool.isRequired
   }
   
   static defaultProps = cardDefaults
   
-  cardMotion(x, y, scale, angle) {
+  cardMotion(x, y, scale, angle, order) {
     return {
       WebkitTransform: `translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${angle}deg)`,
-      transform: `translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${angle}deg)`
+      transform: `translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${angle}deg)`,
+      zIndex: order
     };
   }
   
   render() {
-    let {x, y, scale, angle, flipped} = this.props;
+    let {x, y, scale, angle, flipped, order} = this.props;
     let style = {x: spring(x), y: spring(y), angle: spring(angle)};
     const front = classNames(theme.front,
       flipped ? theme.flipped : '',
@@ -49,12 +54,14 @@ export default class DeckCard extends Component {
       <Motion style={style}>
         {
           ({x, y, angle}) => (
-            <div className={theme.move} style={this.cardMotion(x, y, scale, angle)}>
+            <div className={theme.move} style={this.cardMotion(x, y, scale, angle, order)}>
+              <div className={theme.originb}></div>
               <div className={theme.inner}>
                 <div className={front}>
                   <p>{this.props.value}</p>
                 </div>
                 <div className={back}></div>
+                <div className={theme.origin}></div>
               </div>
             </div>
           )

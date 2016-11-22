@@ -20,7 +20,7 @@ class Editor extends Component {
         <Panel>
           <AppBar title={'Editor'} leftIcon={'menu'} onLeftIconClick={this.props.toggleDrawerActive} />
           <div className={theme.page}>
-              <Deck action={deckAction}/>
+            <Deck action={deckAction} theme={theme}/>
           </div>
         </Panel>
       );

@@ -1,12 +1,15 @@
 import React, { Component, PropTypes } from 'react';
+import { chain, chunk, slice, sortBy, each, shuffle as shuf } from 'lodash'; 
 import { themr } from 'react-css-themr';
 import theme from './Deck.scss';
 import DeckCard from './DeckCard';
 import { cardDefaults } from './DeckCard';
-import {resetPositions, randomPositions, suitRowPositions, centroidPositions, deal, flip, sort, shuffle} from './CardUtil';
+import {resetPositions, randomPositions, suitRowPositions,
+  centroidPositions, dealCards, flip, sort, shuffle, boundry} from './CardUtil';
+import Pile from './Pile';
 
-const CARD_WIDTH = 150;
-const CARD_HEIGHT = 220;
+export const CARD_WIDTH = 150;
+export const CARD_HEIGHT = 220;
 
 @themr('Deck', theme)
 export default class Deck extends Component {
@@ -22,11 +25,19 @@ export default class Deck extends Component {
     types: ['A','2','3','4','5','6','7','8','9','10','J','Q','K'],
     cards: [],
     players: 4,
-    dealTimer: 0
+    dealTimer: 0,
+    piles: [],
+    deal: 7,
+    game: {
+      pileDefs: [
+        {x:.5,y:1,o:'ROW'},{x:0,y:.5,r:90},{x:.5,y:0,o:'ROW'},{x:1,y:.5,r:270},{x:.05,y:.05,r:-45},{x:.5,y:.5}
+      ]
+    }
   }
   
   componentDidMount(){
-    this.setState({cards: this.createCards()});
+    let cards = this.createCards();
+    this.setState({cards: cards});
   }
   
   componentWillReceiveProps(nextProps){
@@ -44,17 +55,18 @@ export default class Deck extends Component {
       
       switch(action){
         case 'deal':
-          let t = setTimeout(()=>{
-            this.setState({
-              ...this.state,
-              dealTimer:0,
-              cards: deal(this.state.cards, this.state.players, this.boundry())
-            });
-          }, 1500);
-          this.setState({...this.state, dealTimer:t, cards: flip(resetPositions(this.state.cards), true)});
+          // let t = setTimeout(()=>{
+          //   this.setState({
+          //     ...this.state,
+          //     dealTimer:0,
+          //     cards: deal(this.state.cards, this.state.players, boundry(this.state.cards[0], this.refs.node))
+          //   });
+          // }, 1500);
+          // this.setState({...this.state, dealTimer:t, cards: flip(resetPositions(this.state.cards), true)});
+          this.dealCards();
           break;
         case 'suits':
-          this.setState({...this.state, cards: suitRowPositions(this.state.cards, this.state.types, this.boundry())});
+          this.setState({...this.state, cards: suitRowPositions(this.state.cards, this.state.types, boundry(this.state.cards[0], this.refs.node))});
           break;
         case 'shuffle':
           this.setState({...this.state, cards: shuffle(this.state.cards, this.centerX(), this.centerY())});
@@ -66,7 +78,7 @@ export default class Deck extends Component {
           this.setState({...this.state, cards: centroidPositions(this.state.cards, this.centerX(), this.centerY())});
           break;
         case 'random':
-          this.setState({...this.state, cards: randomPositions(this.state.cards, this.boundry())});
+          this.setState({...this.state, cards: randomPositions(this.state.cards, boundry(this.state.cards[0], this.refs.node))});
           break;
         case 'flip':
           this.setState({...this.state, cards: flip(this.state.cards)});
@@ -76,6 +88,27 @@ export default class Deck extends Component {
           this.setState({...this.state, cards: resetPositions(this.state.cards)});
       }
     }
+  }
+  
+  dealCards = () => {
+    let { cards, deal, players } = this.state;
+    
+    //1. Seperate Cards into chunks (player piles, draw pile)
+    let chunks = dealCards(cards, players, deal);
+    
+    //2. Create piles for each player and each game pile
+    let piles = this.createPiles(players + 2);
+    
+    //3. Add cards to piles
+    each(chunks, (c, i) => {
+      piles[i].setCards(c, true);
+    });
+    
+    //4. Animate cards going to each pile
+    //5. Pile has "organizer" to make them look proper
+    //console.table(cards);
+    
+    this.setState({cards: cards, piles: piles});
   }
   
   createCards = () => {
@@ -95,36 +128,50 @@ export default class Deck extends Component {
     return c;
   }
   
-  boundry = () => {
-    let c = this.state.cards[0];
-    let cw = CARD_WIDTH * c.scale;
-    return {
-      x: -cw * 0.5,
-      y: -CARD_HEIGHT * c.scale,
-      width: this.refs.node.clientWidth - (cw + (cw * 0.5)),
-      height: this.refs.node.clientHeight - CARD_HEIGHT
-    };
+  createPiles(piles){
+    let { pileDefs } = this.state.game;
+    let pi = [];
+    let p;
+    let d;
+    for(let i = 0; i<piles; i++){
+      d = pileDefs[i];
+      p = new Pile(i, pileDefs[i]);
+      p.setBoard(this.refs.node);
+      //TODO: Abstract this out to parent state
+      //p.setAnchor(d.x, d.y, d.r || 0);
+      //this.setPileAnchor(p, i);
+      pi.push(p);
+    }
+    return pi;
   }
   
   centerX = () => {
-    let b = this.boundry();
+    let b = boundry(this.state.cards[0], this.refs.node);
     return b.x + ((b.width - b.x) * 0.5);
   }
   
   centerY = () => {
-    let b = this.boundry();
+    let b = boundry(this.state.cards[0], this.refs.node);
     return b.y + ((b.height - b.y) * 0.5);
   }
   
   renderCards(cards, action) {
-    return cards.map(c => <DeckCard {...c} />);
+    return chain(each(cards, (card, key) => {
+      card.order = Math.round(card.x - card.y + card.z);
+    }))
+    .orderBy('order', 'asc')
+    .each((card, key) => {
+      card.order = key;
+    })
+    .map(c => <DeckCard {...c} />)
+    .value();
   }
   
   render() {
     const { cards } = this.state;
-    const { action } = this.props;
+    const { action, theme } = this.props;
     return (
-      <div ref="node" className={theme.deck}>
+      <div ref="node" className={theme.board}>
         {
           this.renderCards(cards, action)
         }

@@ -1,12 +1,7 @@
-.deck {
+.board {
   position: relative;
   display: flex;
   flex: 1;
   overflow: hidden;
-}
-
-.board {
-  width: 800px;
-  height: 800px;
   background-color: red;
 }
