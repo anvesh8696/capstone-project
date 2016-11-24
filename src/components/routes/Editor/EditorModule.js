@@ -11,6 +11,7 @@ export const FLIP_CARDS = 'FLIP_CARDS';
 export const HAND_SELECT_RANDOM_CARDS = 'HAND_SELECT_RANDOM_CARDS';
 export const RANDOM_CARDS = 'RANDOM_CARDS';
 export const SORT_CARDS = 'SORT_CARDS';
+export const PLAYER_ACTION = 'PLAYER_ACTION';
 
 // ------------------------------------
 // Actions
@@ -23,6 +24,7 @@ export const fanCards = createAction(FAN_CARDS);
 export const flipCards = createAction(FLIP_CARDS);
 export const randomCards = createAction(RANDOM_CARDS);
 export const handSelectRandomCards = createAction(HAND_SELECT_RANDOM_CARDS);
+export const playerAction = createAction(PLAYER_ACTION);
 
 // ------------------------------------
 // ASYNC Actions
@@ -55,7 +57,8 @@ export const editorReducer = handleActions({
   [FAN_CARDS]: (state, action) => ({...state, deckAction: 'fan'}),
   [FLIP_CARDS]: (state, action) => ({...state, deckAction: rLabel('flip')}),
   [RANDOM_CARDS]: (state, action) => ({...state, deckAction: rLabel('random')}),
-  [HAND_SELECT_RANDOM_CARDS]: (state, action) => ({...state, deckAction: rLabel('hand_select_random')})
+  [HAND_SELECT_RANDOM_CARDS]: (state, action) => ({...state, deckAction: rLabel('hand_select_random')}),
+  [PLAYER_ACTION]: (state, action) => ({...state, deckAction: rLabel(action.payload)})
 }, initialState);
 
 export default editorReducer;

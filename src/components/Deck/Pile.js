@@ -1,5 +1,5 @@
 //import {resetPositions, randomPositions, suitRowPositions, centroidPositions, deal, flip, sort, shuffle} from './CardUtil';
-import { pull, each } from 'lodash';
+import { pull, each, find } from 'lodash';
 import { resetPositions, boundry, boundryCentroid } from './CardUtil';
 
 const CARD_WIDTH = 150;
@@ -27,7 +27,7 @@ export default class Pile {
     board: null
   }
   
-  constructor(id, def){console.log(id, def)
+  constructor(id, def){
     this.state.id = id;
     this.state.organizer = def.o || PILE;
     this.setAnchor(def.x, def.y, def.r || 0);
@@ -55,6 +55,26 @@ export default class Pile {
     }
   }
   
+  selectCard = (id) => {
+    this.state.cards[id].selected = true;
+  }
+  
+  delectCard = (id) => {
+    this.state.cards[id].selected = false;
+  }
+  
+  isCardInPile = (card) => {
+    return find(this.state.cards, { key: card.key }) != undefined;
+  }
+  
+  getFirstCard = () => {
+    return this.state.cards.shift();
+  }
+  
+  hasCards = () => {
+    return this.state.cards.length > 0;
+  }
+  
   removeCard = (c, update = false) => {
     this.state.cards.push(c);
     
@@ -78,7 +98,9 @@ export default class Pile {
   
   updatePilePosition = () => {
     let { anchorX, anchorY, cards, board } = this.state;
-    let b = boundry(cards[0], board);
+    let scale = cards.length > 0 ? cards[0].scale : 0.5;
+    let offset = (CARD_WIDTH > CARD_HEIGHT ? CARD_WIDTH: CARD_HEIGHT) * scale;
+    let b = boundry(board, offset);
     // console.log(this.state.id, anchorX, anchorY);
     this.state = {
       ...this.state,
@@ -99,7 +121,8 @@ export default class Pile {
   }
   
   orgainizePile(cards, x, y, angle){
-    let ch = cards[0].scale * CARD_HEIGHT;
+    let scale = cards.length > 0 ? cards[0].scale : 0.5;
+    let ch = CARD_HEIGHT * scale;
     return each(cards, (c, i) => {
       c.x = x;
       c.y = y + i * 1;

@@ -1,0 +1,11 @@
+.button:not(:first-child) {
+  margin-left: 10px;
+}
+
+.buttonBar {
+  position: absolute;
+  left: 50%;
+  bottom: 23%;
+  transform: translate(-50%, 0);
+  z-index: 5000;
+}

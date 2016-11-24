@@ -1,5 +1,6 @@
 import { connect } from 'react-redux';
 import Editor from './Editor';
+import { playerAction } from './EditorModule';
 
 const mapStateToProps = (state) => {
   return {
@@ -9,6 +10,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    buttonAction: (action) => dispatch(playerAction(action)),
   };
 };
 

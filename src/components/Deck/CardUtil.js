@@ -112,9 +112,9 @@ export function sort(cards, cx=0, cy=0, key='so'){
   return resetPositions(sortBy(cards, key), cx, cy);
 }
 
-export function flip(cards, flipped){
+export function flip(cards, flipped = false){
   return forEach(cards, (c) => {
-    c.flipped = flipped || !c.flipped;
+    c.flipped = flipped;
   });
 }
 
@@ -122,13 +122,12 @@ export const randomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-export const boundry = (card, node) => {
-  let offset = (CARD_WIDTH > CARD_HEIGHT ? CARD_WIDTH: CARD_HEIGHT) * card.scale;
+export const boundry = (node, padding) => {
   return {
-    x: offset,
-    y: offset,
-    width: node.clientWidth - (offset * 2),
-    height: node.clientHeight - (offset * 2)
+    x: padding,
+    y: padding,
+    width: node.clientWidth - (padding * 2),
+    height: node.clientHeight - (padding * 2)
   };
 };
 
