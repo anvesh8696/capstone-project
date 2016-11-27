@@ -1,0 +1,41 @@
+.container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.player {
+  position: absolute;
+}
+
+.p0 {
+  @extend .player;
+  left: 50%;
+  bottom: 1%;
+  > .chip {
+    transform: translateX(-50%);
+  }
+}
+
+.p1 {
+  @extend .player;
+  left: 5%;
+  top: 30%;
+}
+
+.p2 {
+  @extend .player;
+  left: 50%;
+  top: 1%;
+  > .chip {
+    transform: translateX(-50%);
+  }
+}
+
+.p3 {
+  @extend .player;
+  right: 5%;
+  top: 30%;
+}

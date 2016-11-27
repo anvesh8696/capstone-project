@@ -8,6 +8,7 @@ import deckTheme from 'components/Deck/Deck.scss';
 import PlayerButtonBar from 'components/PlayerButtonBar';
 import { organize, isCardInPile } from 'components/Deck/PileUtil';
 import { each, random } from 'lodash';
+import PlayerAvatars from 'components/PlayerAvatars';
 
 @themr('CardGame', defaultTheme)
 class CardGame extends Component {
@@ -134,6 +135,7 @@ class CardGame extends Component {
     const { theme, game, buttonAction } = this.props;
     return (
       <div className={theme.page}>
+        <PlayerAvatars players={[{name:'Jack'},{name:'Fill'},{name:'Ashley'},{name:'Brian'}]}/>
         <PlayerButtonBar onDraw={this.handleDraw} onDone={this.handleDone}/>
         <Deck ref="deck" action={''} {...game} theme={theme} onCardClick={this.handleCardClick} onUpdate={this.handleDeckUpdate}/>
       </div>
