@@ -1,6 +1,5 @@
-//import {resetPositions, randomPositions, suitRowPositions, centroidPositions, deal, flip, sort, shuffle} from './CardUtil';
-import { pull, each, find } from 'lodash';
-import { resetPositions, boundry, boundryCentroid } from './CardUtil';
+import { pull, each, find, remove, concat } from 'lodash';
+import { boundry } from './CardUtil';
 
 const CARD_WIDTH = 150;
 const CARD_HEIGHT = 220;
@@ -23,8 +22,9 @@ export default class Pile {
     anchorY: 0.5,
     anchorR: 0,
     x: 0,
-    y: 0,
-    board: null
+    y: 0
+    // ,
+    // board: null
   }
   
   constructor(id, def){
@@ -32,27 +32,29 @@ export default class Pile {
     this.state.organizer = def.o || PILE;
     this.setAnchor(def.x, def.y, def.r || 0);
   }
-  
+ 
   setAnchor = (x=0, y=0, r=0) => {
     this.state = {...this.state, anchorX:x, anchorY:y, anchorR:r};
   }
   
-  setBoard = (board) => {
-    this.state.board = board;
-  }
+  // setBoard = (board) => {
+  //   this.state.board = board;
+  // }
   
   setCards = (cards, update = false) => {
-    this.state.cards = cards;
-    if(update){
-      this.updatePosition();
+    if(cards){
+      this.state.cards = cards;
     }
+    // if(update){
+    //   this.updatePosition(this.board);
+    // }
   }
   
-  addCard = (c, update = false) => {
-    this.state.cards.push(c);
-    if(update){
-      this.updatePosition();
-    }
+  addCards = (c, update = false) => {
+    this.state.cards = concat(this.state.cards, c);
+    // if(update){
+    //   this.updatePosition(this.board);
+    // }
   }
   
   selectCard = (id) => {
@@ -63,17 +65,15 @@ export default class Pile {
     this.state.cards[id].selected = false;
   }
   
-  isCardInPile = (card) => {
-    return find(this.state.cards, { key: card.key }) != undefined;
-  }
+  isCardInPile = (card) => find(this.state.cards, { key: card.key }) != undefined;
   
-  getFirstCard = () => {
-    return this.state.cards.shift();
-  }
+  getFirstCard = () => this.state.cards.shift();
   
-  hasCards = () => {
-    return this.state.cards.length > 0;
-  }
+  getSelectedCards = () => remove(this.state.cards, (e) => e.selected === true);
+  
+  getAnchor = () => ({x:this.state.anchorX, y:this.state.anchorY, r:this.state.anchorR});
+  
+  hasCards = () => this.state.cards.length > 0;
   
   removeCard = (c, update = false) => {
     this.state.cards.push(c);
@@ -86,27 +86,29 @@ export default class Pile {
     // Deal cards > Choose player goes first > is game over > next player turn
     this.state.cards = pull(this.state.cards, c);
     
-    if(update){
-      this.updatePosition();
-    }
+    // if(update){
+    //   this.updatePosition(this.board);
+    // }
   }
   
-  updatePosition = () => {
-    this.updatePilePosition();
+  updatePosition = (board) => {
+    this.updatePilePosition(board);
     this.updateCardPositions();
   }
   
-  updatePilePosition = () => {
-    let { anchorX, anchorY, cards, board } = this.state;
-    let scale = cards.length > 0 ? cards[0].scale : 0.5;
-    let offset = (CARD_WIDTH > CARD_HEIGHT ? CARD_WIDTH: CARD_HEIGHT) * scale;
-    let b = boundry(board, offset);
-    // console.log(this.state.id, anchorX, anchorY);
-    this.state = {
-      ...this.state,
-      x: b.x + b.width * anchorX,
-      y: b.y + b.height * anchorY
-    };
+  updatePilePosition = (board) => {
+    let { anchorX, anchorY, cards } = this.state;
+    if(cards){
+      let scale = cards.length > 0 ? cards[0].scale : 0.5;
+      let offset = (CARD_WIDTH > CARD_HEIGHT ? CARD_WIDTH: CARD_HEIGHT) * scale;
+      let b = boundry(board, offset);
+      // console.log(this.state.id, anchorX, anchorY);
+      this.state = {
+        ...this.state,
+        x: b.x + b.width * anchorX,
+        y: b.y + b.height * anchorY
+      };
+    }
   }
   
   updateCardPositions = () => {
@@ -121,27 +123,39 @@ export default class Pile {
   }
   
   orgainizePile(cards, x, y, angle){
-    let scale = cards.length > 0 ? cards[0].scale : 0.5;
-    let ch = CARD_HEIGHT * scale;
-    return each(cards, (c, i) => {
-      c.x = x;
-      c.y = y + i * 1;
-      c.z = 0;
-      c.angle = angle;
-    });
+    if(cards && cards.length > 0){
+      let scale = cards[0].scale;
+      let ch = CARD_HEIGHT * scale;
+      // return each(cards, (c, i) => {
+        // c = c.merge({
+        //   x : x,
+        //   y : y - i * 1,
+        //   z : 0,
+        //   angle : angle
+        // });
+      // });
+      // let i = 0;
+      // return cards.map((c) => c.merge({
+      //   x : x,
+      //   y : y - (i++) * 1,
+      //   z : 0,
+      //   angle : angle
+      // }));
+      // console.log(this.state.cards);
+    }
   }
   
   orgainizeRow(cards, x, y, angle){
-    if(cards.length > 0){
+    if(cards && cards.length > 0){
       let cw = cards[0].scale * CARD_WIDTH * 0.5;
       let ch = cards[0].scale * CARD_HEIGHT * 0.5;
       x -= ((cards.length * cw * 0.5) - cw);
-      return each(cards, (c, i) => {
-        c.x = x + (i * cw);
-        c.y = y;
-        c.z = 0;
-        c.angle = angle;
-      });
+      return each(cards, (c, i) => c.merge({
+        x : x + (i * cw),
+        y : y,
+        z : 0,
+        angle : angle
+      }));
     }
   }
 }

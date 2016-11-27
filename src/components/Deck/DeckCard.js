@@ -13,7 +13,20 @@ export const cardDefaults = {
   z: 0,
   scale: 0.5,
   angle: 0,
+  order: 0,
+  pile: 0,
+  angleOffset: 0,
   flipped: false,
+  selected: false,
+  clickable: false
+};
+
+export const cardDealDefaults = {
+  x: 0,
+  y: 0,
+  z: 0,
+  pile: 0,
+  angleOffset: 0,
   selected: false,
   clickable: false
 };
@@ -30,6 +43,8 @@ export default class DeckCard extends Component {
     z: PropTypes.number.isRequired,
     scale: PropTypes.number.isRequired,
     angle: PropTypes.number.isRequired,
+    angleOffset: PropTypes.number.isRequired,
+    pile: PropTypes.number.isRequired,
     order: PropTypes.number.isRequired,
     flipped: PropTypes.bool.isRequired,
     selected: PropTypes.bool.isRequired,
@@ -48,8 +63,8 @@ export default class DeckCard extends Component {
   }
   
   render() {
-    let {x, y, scale, angle, flipped, selected, clickable, order} = this.props;
-    let style = {x: spring(x), y: spring(y), angle: spring(angle)};
+    let {x, y, scale, angle, angleOffset, flipped, selected, clickable, order} = this.props;
+    let style = {x: spring(x), y: spring(y), angle: spring(angle + angleOffset)};
     const front = classNames(theme.front,
       flipped ? theme.flipped : '',
       selected ? theme.selected : '',

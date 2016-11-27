@@ -1,12 +1,11 @@
 import React, { Component, PropTypes } from 'react';
-import { chain, debounce, each, findIndex, random } from 'lodash'; 
+import { chain, debounce, each, findIndex, random } from 'lodash';
 import { themr } from 'react-css-themr';
 import theme from './Deck.scss';
 import DeckCard from './DeckCard';
-import { cardDefaults } from './DeckCard';
 import {resetPositions, randomPositions, suitRowPositions,
-  centroidPositions, dealCards, flip, sort, shuffle, boundry} from './CardUtil';
-import Pile from './Pile';
+  centroidPositions, flip, sort, shuffle, boundry, merge} from './CardUtil';
+import { updatePiles, updateCards } from './PileUtil';
 
 export const CARD_WIDTH = 150;
 export const CARD_HEIGHT = 220;
@@ -16,51 +15,43 @@ export default class Deck extends Component {
   
   static propTypes = {
     theme: PropTypes.object.isRequired,
-    action: PropTypes.string.isRequired
+    action: PropTypes.string.isRequired,
+    cards: PropTypes.array.isRequired,
+    piles: PropTypes.object.isRequired,
+    pileDefs: PropTypes.array.isRequired,
+    onCardClick: PropTypes.func.isRequired,
+    onUpdate: PropTypes.func.isRequired
   }
   
   state = {
-    open: false,
-    suits: ['spade', 'heart', 'club', 'diamond'],
-    types: ['A','2','3','4','5','6','7','8','9','10','J','Q','K'],
-    cards: [],
-    players: 4,
-    dealTimer: 0,
-    piles: [],
-    deal: 7,
-    player: {
-      id: 0
-    },
-    game: {
-      teams: [
-        [0, 2],
-        [1, 3]
-      ],
-      pileDefs: [
-        {x:.5,y:1,o:'ROW'},{x:0,y:.5,r:90},{x:.5,y:0,o:'ROW'},{x:1,y:.5,r:270},{x:.05,y:.05,r:-45},{x:.5,y:.5}
-      ]
-    }
+    dealTimer: 0
   }
   
   debounceResize = null;
   
-  componentDidMount(){
-    let cards = this.createCards();
-    this.setState({cards: cards});
-    this.debounceResize = debounce(() => this.handleResize(), 50, {'maxWait': 50});
-    window.addEventListener('resize', this.debounceResize);
-  }
-  
-  handleResize = () => {
-    each(this.state.piles, (p) => {
-      p.updatePosition();
-    });
-    this.forceUpdate();
-  };
-  
   componentWillUnmount(){
     window.removeEventListener('resize', this.debounceResize);
   }
+  
+  componentDidMount(){
+    this.debounceResize = debounce(() => this.handleResize(), 50, {'maxWait': 50});
+    window.addEventListener('resize', this.debounceResize);
+    
+    //this.handleResize();
+  }
+  
+  handleResize = () => {
+    let { piles, cards } = this.props;
+    
+    if(cards.length > 0){
+      let scale = cards.length > 0 ? cards[0].scale : 0.5;
+      let offset = (CARD_WIDTH > CARD_HEIGHT ? CARD_WIDTH: CARD_HEIGHT) * scale;
+      let b = boundry(this.refs.node, offset);
+      let nPiles = updatePiles(piles, b);
+      let nCards = updateCards(nPiles, cards);
+      this.props.onUpdate({type:'merge', data:{piles:nPiles, cards:nCards}});
+    }
+  };
   
   componentWillReceiveProps(nextProps){
     // the cards need to update  
@@ -79,49 +70,68 @@ export default class Deck extends Component {
         case 'draw':
           this.drawCard(random(0, 3));
           break;
+        case 'done':
+          this.playerDone(0);
+          break;
         case 'deal':
           // let t = setTimeout(()=>{
           //   this.setState({
           //     ...this.state,
           //     dealTimer:0,
-          //     cards: deal(this.state.cards, this.state.players, boundry(this.refs.node, this.state.cards[0].scale))
+          //     cards: deal(this.props.cards, this.state.players, boundry(this.refs.node, this.props.cards[0].scale))
           //   });
           // }, 1500);
-          // this.setState({...this.state, dealTimer:t, cards: flip(resetPositions(this.state.cards), true)});
+          // this.setState({...this.state, dealTimer:t, cards: flip(resetPositions(this.props.cards), true)});
           this.dealCards();
           break;
         case 'suits':
-          this.setState({...this.state, cards: suitRowPositions(this.state.cards, this.state.types, boundry(this.refs.node, this.state.cards[0].scale))});
+          this.setState({...this.state, cards: suitRowPositions(this.props.cards, this.state.types, boundry(this.refs.node, this.props.cards[0].scale))});
           break;
         case 'shuffle':
-          this.setState({...this.state, cards: shuffle(this.state.cards, this.centerX(), this.centerY())});
+          this.setState({...this.state, cards: shuffle(this.props.cards, this.centerX(), this.centerY())});
           break;
         case 'sort':
-          this.setState({...this.state, cards: sort(this.state.cards, this.centerX(), this.centerY())});
+          this.setState({...this.state, cards: sort(this.props.cards, this.centerX(), this.centerY())});
           break;
         case 'fan':
-          this.setState({...this.state, cards: centroidPositions(this.state.cards, this.centerX(), this.centerY())});
+          this.setState({...this.state, cards: centroidPositions(this.props.cards, this.centerX(), this.centerY())});
           break;
         case 'random':
-          this.setState({...this.state, cards: randomPositions(this.state.cards, boundry(this.refs.node, this.state.cards[0].scale))});
+          this.setState({...this.state, cards: randomPositions(this.props.cards, boundry(this.refs.node, this.props.cards[0].scale))});
           break;
         case 'flip':
-          this.setState({...this.state, cards: flip(this.state.cards)});
+          this.setState({...this.state, cards: flip(this.props.cards)});
           break;
         case 'hand_select_random':
           this.handSelectRandomCards();
           break;
         default:
-          this.setState({...this.state, cards: resetPositions(this.state.cards)});
+          this.setState({...this.state, cards: resetPositions(this.props.cards)});
       }
     }
   }
   
   handSelectRandomCards = () => {
     let playerID = this.state.player.id;
-    let pile = this.state.piles[playerID];
+    let pile = this.props.piles[playerID];
     
     pile.selectCard(3);
+  }
+  
+  playerDone = (player) => {
+    if(this.isPlayerTurn(player)){
+      let playerPile = this.getPlayerPile(player);
+      let discardPile = this.getDiscardPile();
+      let c = playerPile.getSelectedCards();
+      
+      if(c && c.length > 0){
+        merge(c, {flipped: false, selected: false, angleOffset: random(0, 45)});
+        discardPile.addCards(c, true);
+        playerPile.updatePosition(this.refs.node);
+        // Prevent button spam
+        this.state.playerTurn = -1;
+      }
+    }
   }
   
   drawCard = (player) => {
@@ -142,34 +152,10 @@ export default class Deck extends Component {
           c.flipped = false;
         }
         
-        playerPile.addCard(c, true);
+        playerPile.addCards(c, true);
         this.setState({...this.state});
       }
     }
-  }
-  
-  dealCards = () => {
-    let { cards, deal, players } = this.state;
-    
-    //1. Seperate Cards into chunks (player piles, draw pile)
-    let chunks = dealCards(cards, players, deal);
-    
-    //2. Create piles for each player and each game pile
-    let piles = this.createPiles(players + 2);
-    
-    //3. Add cards to piles and updates positions
-    //let playerID = this.state.player.id;
-    each(chunks, (c, i) => {
-      c = flip(c, !this.isTeammate(i));
-      // if(i === playerID){
-      //   //c = c.map((e) => ({...e, clickable: true}));
-      //   each(c, (e) => {e.clickable = true});
-      //   //console.log(i, playerID, c);
-      // }
-      piles[i].setCards(c, true);
-    });
-    
-    this.setState({cards: cards, piles: piles});
   }
   
   isTeammate = (id) => {
@@ -179,92 +165,54 @@ export default class Deck extends Component {
     return team && team.indexOf(id) != -1;
   }
   
-  isPlayerTurn = () => {
-    //TODO: add turn system control
-    // - submit card?
-    // - create in a way that a NPC / RPC can use the same code
-    return true;
-  }
+  isPlayerTurn = (player) => this.state.playerTurn === player
   
   getDrawPile = () => {
-    let p = this.state.piles;
+    let p = this.props.piles;
     return p.length > 2 ? p[p.length - 2] : null;
+  }
+  
+  getDiscardPile = () => {
+    let p = this.props.piles;
+    return p.length > 1 ? p[p.length - 1] : null;
   }
   
   getPlayerPile = (player) => {
     let playerID = player || this.state.player.id;
-    return this.state.piles[playerID];
+    return this.props.piles[playerID];
   }
   
   isPlayerCard = (card, player) => {
     let playerID = player || this.state.player.id;
-    let pile = this.state.piles[playerID];
+    let pile = this.props.piles[playerID];
     return pile.isCardInPile(card);
   }
   
-  createCards = () => {
-    const {suits, types} = this.state;
-    let c=[];
-    let t = suits.length * types.length;
-    for(let i=0; i<t; i++){
-      c.push({
-        ...cardDefaults,
-        key: 'key_' + i,
-        suit: suits[Math.floor(i / types.length)],
-        value: types[i % types.length],
-        so: i,
-        scale: 0.5
-      });
-    }
-    return c;
-  }
-  
-  createPiles(piles){
-    let { pileDefs } = this.state.game;
-    let pi = [];
-    let p;
-    for(let i = 0; i<piles; i++){
-      p = new Pile(i, pileDefs[i]);
-      p.setBoard(this.refs.node);
-      pi.push(p);
-    }
-    return pi;
-  }
-  
   centerX = () => {
-    let b = boundry(this.refs.node, this.state.cards[0].scale);
+    let b = boundry(this.refs.node, this.props.cards[0].scale);
     return b.x + ((b.width - b.x) * 0.5);
   }
   
   centerY = () => {
-    let b = boundry(this.refs.node, this.state.cards[0].scale);
+    let b = boundry(this.refs.node, this.props.cards[0].scale);
     return b.y + ((b.height - b.y) * 0.5);
   }
   
-  onHandleCardClick = (card) => {
-    console.log('onHandleCardClick', card);
-    
-    //TODO: Check if the card is in the players hand
-    if(this.isPlayerTurn() && this.isPlayerCard(card)){
-      card.selected = !card.selected;
-      this.setState({cards: this.state.cards});
-    }
-  }
-  
   renderCards(cards, action) {
+    const { onCardClick } = this.props;
     return chain(each(cards, (card, key) => {
-      card.order = Math.round(card.x - card.y + card.z);
+      card.set('order', Math.round(card.x - card.y + card.z));
     }))
     .orderBy('order', 'asc')
     .each((card, key) => {
-      card.order = key;
+      card.set('order', key);
     })
-    .map(c => <DeckCard {...c} onClick={() => this.onHandleCardClick(c)}/>)
+    .map(c => <DeckCard {...c} onClick={() => onCardClick(c)}/>)
     .value();
   }
   
   render() {
-    const { cards } = this.state;
+    const { cards } = this.props;
     const { action, theme } = this.props;
     return (
       <div ref="node" className={theme.board}>

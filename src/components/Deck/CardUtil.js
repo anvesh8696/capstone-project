@@ -1,19 +1,118 @@
-import { chain, concat, chunk, slice, sortBy, forEach, shuffle as shuf } from 'lodash'; 
+import { chain, findIndex, concat, chunk, random, sortBy, each, shuffle as shuf } from 'lodash';
+import Immutable from 'seamless-immutable';
 import { CARD_WIDTH, CARD_HEIGHT } from './Deck';
+import { cardDefaults, cardDealDefaults } from './DeckCard';
+import Pile from 'components/Deck/Pile';
+
+export function generateCards(deckID){
+  const {suits, types} = findDeckInfo(deckID);
+  let c=[];
+  let t = suits.length * types.length;
+  for(let i=0; i<t; i++){
+    c.push({
+      ...cardDefaults,
+      key: 'key_' + i,
+      suit: suits[Math.floor(i / types.length)],
+      value: types[i % types.length],
+      so: i,
+      scale: 0.5
+    });
+  }
+  return Immutable(c);
+}
+
+export function generatePiles(pileDefs, cards, deal, teams, players, playerID, node) {
+  //let { cards, deal, players } = this.state;
+  
+  //1. Seperate Cards into chunks (player piles, draw pile)
+  let chunks = dealCards(cards, players.length, deal);
+  
+  //2. Create piles for each player and each game pile
+  let piles = createPiles(pileDefs, players.length + 2);
+  
+  //3. Add cards to piles and updates positions
+  let nCards = cards;
+  each(chunks, (p, i) => {
+    
+    //c = merge(c, {flipped: !isTeammate(playerID, i, teams), pile:i, ...cardDealDefaults});
+    
+    // let index = findIndex(cards, (fic) => { return fic.key == c.key; });
+    // cards = cards.set(index, )
+    
+    
+    each(p, (c, k) => {
+      let index = findIndex(nCards, (fic) => { return fic.key == c.key; });
+      
+      c = c.merge({...cardDealDefaults, flipped: !isTeammate(playerID, i, teams), pile:i});
+      
+      nCards = nCards.set(index, c);
+    });
+    //console.log(c)
+    //return nCards;
+    
+    // if(i === playerID){
+    //   //c = c.map((e) => ({...e, clickable: true}));
+    //   each(c, (e) => {e.clickable = true});
+    //   //console.log(i, playerID, c);
+    // }
+    
+    //-----------------------------
+    //replace
+    
+    //piles[i].setCards(c, true);
+    //piles[i].updatePosition(node);
+    
+    
+    
+  });
+  return {cards: nCards, piles: piles};
+}
+
+const isTeammate = (playerID, id, teams) => {
+  let teamID = findIndex(teams, (t) => { return t.indexOf(playerID) != -1; });
+  let team = teams[teamID];
+  return team && team.indexOf(id) != -1;
+};
+
+const createPiles = (pileDefs, total) => {
+  let piles = {};
+  for(let i = 0; i<total; i++){
+    piles[i] = {...pileDefs[i], id:i};
+  }
+  return Immutable(piles);
+};
+
+export function generatePileDefs(deckID){
+  return [
+    {x:0,y:0,anchorX:.5,anchorY:1,anchorR:0,o:'ROW'},
+    {x:0,y:0,anchorX:0,anchorY:.5,anchorR:90,o:'PILE'},
+    {x:0,y:0,anchorX:.5,anchorY:0,anchorR:0,o:'ROW'},
+    {x:0,y:0,anchorX:1,anchorY:.5,anchorR:270,o:'PILE'},
+    {x:0,y:0,anchorX:.05,anchorY:.05,anchorR:-45,o:'PILE'},
+    {x:0,y:0,anchorX:.5,anchorY:.5,anchorR:0,o:'PILE'}
+  ];
+}
+
+export function findDeckInfo(deckID){
+  return {
+    suits: ['spade', 'heart', 'club', 'diamond'],
+    types: ['A','2','3','4','5','6','7','8','9','10','J','Q','K']
+  };
+}
 
 export function resetPositions(cards, x=0, y=0, angle=0){
-  return forEach(cards, (c) => {
-    c.x = x;
-    c.y = y;
-    c.z = 0;
-    c.angle = angle;
-  });
+  return each(cards, (c) => c.merge({
+    x : x,
+    y : y,
+    z : 0,
+    angle : angle
+  }));
 }
 
 export function randomPositions(cards, boundry) {
-  return forEach(cards, (c) => {
-    c.x = randomInt(boundry.x, boundry.width);
-    c.y = randomInt(boundry.y, boundry.height);
+  return each(cards, (c) => {
+    c.x = random(boundry.x, boundry.width);
+    c.y = random(boundry.y, boundry.height);
     c.z = 0;
     c.angle = 0;
   });
@@ -21,7 +120,7 @@ export function randomPositions(cards, boundry) {
 
 export function suitRowPositions(cards, types, boundry, key='so'){
   let col, row;
-  return forEach(sortBy(cards, key), (c, i) => {
+  return each(sortBy(cards, key), (c, i) => {
     col = i % types.length;
     row = Math.floor(i / types.length);
     c.x = boundry.x + col * (150 * c.scale);
@@ -34,7 +133,7 @@ export function suitRowPositions(cards, types, boundry, key='so'){
 export function centroidPositions(cards, cx=0, cy=0, radius=100, circumference=280, angle=90){
   let step = circumference / cards.length;
   let a, dy, dx;
-  return forEach(cards, (c, i) => {
+  return each(cards, (c, i) => {
     a = step * i * (Math.PI / 180) + angle;
     c.x = cx + radius * Math.cos(a);
     c.y = cy + radius * Math.sin(a);
@@ -74,35 +173,34 @@ const boundryCentroid = function (boundry, side, card){
   }
 };
 
-/*
-export function deal(cards, players, boundry, deal = 7){
-  let i;
-  let b;
-  let newCards = [];
-  let chunks = [];
+//NOT USING RIGHT NOW
+// export function deal(cards, players, node, deal = 7){
+//   let i;
+//   let b;
+//   let newCards = [];
+//   let chunks = [];
   
-  // shuffle and flip
-  cards = flip(shuf(cards), true);
+//   // shuffle and flip
+//   cards = flip(shuf(cards), true);
   
-  // deal cards to players
-  chunks = chunk(cards, deal);
+//   // deal cards to players
+//   chunks = chunk(cards, deal);
   
-  // position cards
-  for(i=0; i<chunks.length; i++){
-    if(i < players){
-      b = boundryCentroid(boundry, i, chunks[i][0]);
-    }else{
-      b = {x: 0, y:0};
-    }
-    if(i == 0){
-      newCards = concat(newCards, flip(centroidPositions(chunks[i], b.x, b.y, 200, 80, -90), false));
-    }else{
-      newCards = concat(newCards, resetPositions(chunks[i], b.x, b.y));
-    }
-  }
-  return newCards;
-}
-*/
+//   // position cards
+//   for(i=0; i<chunks.length; i++){
+//     if(i < players){
+//       b = boundryCentroid(boundry, i, chunks[i][0]);
+//     }else{
+//       b = {x: 0, y:0};
+//     }
+//     if(i == 0){
+//       newCards = concat(newCards, flip(centroidPositions(chunks[i], b.x, b.y, 200, 80, -90), false));
+//     }else{
+//       newCards = concat(newCards, resetPositions(chunks[i], b.x, b.y));
+//     }
+//   }
+//   return newCards;
+// }
 
 export function shuffle(cards, cx=0, cy=0){
   return resetPositions(shuf(cards), cx, cy);
@@ -113,14 +211,23 @@ export function sort(cards, cx=0, cy=0, key='so'){
 }
 
 export function flip(cards, flipped = false){
-  return forEach(cards, (c) => {
-    c.flipped = flipped;
-  });
+  return merge(cards, {flipped: flipped});
 }
 
-export const randomInt = (min, max) => {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-};
+export function merge(cards, obj){
+  // return each(cards, (c) => {
+  //   // each(obj, (v, k) => {
+  //   //   c[k] = v;
+  //   // });
+  //   c = c.merge(obj);
+  // });
+  //return cards.map((c) => c.merge(obj));
+  let nCards = cards;
+  each(cards, (c, k) => {
+    nCards = nCards.set(k, obj);
+  });
+  return nCards;
+}
 
 export const boundry = (node, padding) => {
   return {
