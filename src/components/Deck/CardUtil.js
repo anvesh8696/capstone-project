@@ -38,12 +38,12 @@ export function generatePiles(pileDefs, cards, deal, teams, players, playerID, n
     
     // let index = findIndex(cards, (fic) => { return fic.key == c.key; });
     // cards = cards.set(index, )
-    
+    let pileOwner = i < players.length ? players[i].id : undefined;
     
     each(p, (c, k) => {
       let index = findIndex(nCards, (fic) => { return fic.key == c.key; });
       
-      c = c.merge({...cardDealDefaults, flipped: !isTeammate(playerID, i, teams), pile:i});
+      c = c.merge({...cardDealDefaults, flipped: !isTeammate(playerID, pileOwner, teams), pile:i});
       
       nCards = nCards.set(index, c);
     });

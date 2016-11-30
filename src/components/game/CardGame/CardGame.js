@@ -20,9 +20,8 @@ class CardGame extends Component {
     me: PropTypes.object.isRequired,
     buttonAction: PropTypes.func.isRequired,
     updateGame: PropTypes.func.isRequired,
-    mergeGame: PropTypes.func.isRequired
-    //playerDone
-    //playerDrawCard
+    mergeGame: PropTypes.func.isRequired,
+    playerTurnEnd: PropTypes.func.isRequired
   }
   
   handleCardClick = (card) => {
@@ -45,83 +44,89 @@ class CardGame extends Component {
   }
   
   handleDraw = () => {
-    
+    const { id } = this.props.me;
+    if(this.isPlayerTurn(id)){
+      let draw = this.getDrawPileIndex();
+      let cards = this.getPileCards(draw);
+      if(cards.length > 0){
+        let c = cards[cards.length - 1].merge({
+          pile: this.getPlayerIndex(id),
+          flipped: false
+        });
+        this.updateCard(c);
+        
+        // make sure player cards are unselected
+        let pile = this.getPlayerIndex(id);
+        cards = this.getSelectedCards(pile);
+        each(cards, (c) => {
+          if(c.selected){
+            this.updateCard(c.merge({
+              selected: false
+            }));
+          }
+        });
+        
+        this.props.playerTurnEnd(pile);
+        window.dispatchEvent(new Event('resize'));
+      }
+    }
   }
   
   handleDone = () => {
-    /*
-    let playerPile = this.getPlayerPile(player);
-      let discardPile = this.getDiscardPile();
-      let c = playerPile.getSelectedCards();
-      
-      if(c && c.length > 0){
-        merge(c, {flipped: false, selected: false, angleOffset: random(0, 45)});
-        discardPile.addCards(c, true);
-        playerPile.updatePosition(this.refs.node);
-        // Prevent button spam
-        this.state.playerTurn = -1;
-      }
-    */
     const { id } = this.props.me;
     if(this.isPlayerTurn(id)){
       let pile = this.getPlayerIndex(id);
-      let cards = this.selectedCards(pile);
-      let discard = this.getDiscardPile();
+      let cards = this.getSelectedCards(pile);
+      let discard = this.getDiscardPileIndex();
       each(cards, (c) => {
-        /*
-        this.updateCard({
-          ...c, 
-          pile: discard, 
-          flipped: false, 
-          selected: false, 
-          angleOffset: random(0, 45)
-        });
-        */
-        //organize(i, card, pile, cards)
-        /*
         this.updateCard(c.merge({
           pile: discard,
           flipped: false,
           selected: false, 
           angleOffset: random(0, 45)
         }));
-        */
-        c = c.merge({
-          pile: discard,
-          flipped: false,
-          selected: false, 
-          angleOffset: random(0, 45)
-        });
-        this.updateCard(c);
       });
-    }
-        
-    window.dispatchEvent(new Event('resize'));
-      
-      // Prevent button spam
-      // this.state.playerTurn = -1;
-  }
-  
-  
-  selectedCards = (pile) => {
-    let selected = [];
-    each(this.props.game.cards, (c) => {
-      if(c.selected && c.pile == pile){
-        selected.push(c);
+      if(cards.length > 0){
+        this.props.playerTurnEnd(this.getPlayerIndex(id));
+        window.dispatchEvent(new Event('resize'));
       }
-    });
-    return selected;
+    }
   }
   
   isPlayerTurn = (player) => this.props.room.playerTurn === player
 
-  getPlayerIndex = (playerID) => {
-    const { players } = this.props.room;
-    return players.indexOf(playerID);
+  getSelectedCards = (pile) => {
+    let cards = [];
+    each(this.props.game.cards, (c) => {
+      if(c.selected && c.pile == pile){
+        cards.push(c);
+      }
+    });
+    return cards;
   }
   
-  getDiscardPile = () => {
+  getPileCards = (pile) => {
+    let cards = [];
+    each(this.props.game.cards, (c) => {
+      if(c.pile == pile){
+        cards.push(c);
+      }
+    });
+    return cards;
+  }
+  
+  getPlayerIndex = (playerID) => {
+    const { players } = this.props.room;
+    return findIndex(players, (p) => p.id == playerID);
+  }
+  
+  getDiscardPileIndex = () => {
     return 5;
+    return this.props.game.pileDefs.length - 1;
+  }
+  
+  getDrawPileIndex = () => {
+    return 4;
     return this.props.game.pileDefs.length - 1;
   }
   
@@ -132,12 +137,23 @@ class CardGame extends Component {
   }
 
   render() {
-    const { theme, game, buttonAction } = this.props;
+    const { theme, game } = this.props;
+    const { players } = this.props.room;
+    const { id } = this.props.me;
+    const playerIndex = this.getPlayerIndex(id);
     return (
       <div className={theme.page}>
-        <PlayerAvatars players={[{name:'Jack'},{name:'Fill'},{name:'Ashley'},{name:'Brian'}]}/>
+        <PlayerAvatars players={players} playerIndex={playerIndex}/>
         <PlayerButtonBar onDraw={this.handleDraw} onDone={this.handleDone}/>
-        <Deck ref="deck" action={''} {...game} theme={theme} onCardClick={this.handleCardClick} onUpdate={this.handleDeckUpdate}/>
+        <Deck ref="deck"
+          action={''}
+          {...game}
+          playerIndex={playerIndex}
+          totalPlayers={players.length}
+          theme={theme}
+          onCardClick={this.handleCardClick}
+          onUpdate={this.handleDeckUpdate}
+        />
       </div>
     );
   }

@@ -15,7 +15,8 @@ class Room extends Component {
     room: PropTypes.object.isRequired,
     buttonAction: PropTypes.func.isRequired,
     setupRound: PropTypes.func.isRequired,
-    updateGame: PropTypes.func.isRequired
+    updateGame: PropTypes.func.isRequired,
+    playerTurnEnd: PropTypes.func.isRequired
   }
   
   componentDidMount() {

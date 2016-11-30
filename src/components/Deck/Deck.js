@@ -16,6 +16,8 @@ export default class Deck extends Component {
   static propTypes = {
     theme: PropTypes.object.isRequired,
     action: PropTypes.string.isRequired,
+    playerIndex: PropTypes.number.isRequired,
+    totalPlayers: PropTypes.number.isRequired,
     cards: PropTypes.array.isRequired,
     piles: PropTypes.object.isRequired,
     pileDefs: PropTypes.array.isRequired,
@@ -41,14 +43,14 @@ export default class Deck extends Component {
   }
   
   handleResize = () => {
-    let { piles, cards } = this.props;
+    let { piles, cards, playerIndex, totalPlayers } = this.props;
     
     if(cards.length > 0){
       let scale = cards.length > 0 ? cards[0].scale : 0.5;
       let offset = (CARD_WIDTH > CARD_HEIGHT ? CARD_WIDTH: CARD_HEIGHT) * scale;
       let b = boundry(this.refs.node, offset);
       let nPiles = updatePiles(piles, b);
-      let nCards = updateCards(nPiles, cards);
+      let nCards = updateCards(nPiles, cards, playerIndex, totalPlayers);
       this.props.onUpdate({type:'merge', data:{piles:nPiles, cards:nCards}});
     }
   };
@@ -162,6 +164,7 @@ export default class Deck extends Component {
     let playerID = this.state.player.id;
     let teamID = findIndex(this.state.game.teams, (t) => { return t.indexOf(playerID) != -1; });
     let team = this.state.game.teams[teamID];
+    console.log('isteammate', playerID, team, teamID)
     return team && team.indexOf(id) != -1;
   }
   

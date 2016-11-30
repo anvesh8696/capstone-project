@@ -10,14 +10,15 @@ export default class PlayerAvatars extends Component {
   
   static propTypes = {
     theme: PropTypes.object.isRequired,
-    players: PropTypes.array.isRequired
+    players: PropTypes.array.isRequired,
+    playerIndex: PropTypes.number.isRequired
   }
   
-  renderAvatar(name, index) {
+  renderAvatar(name, index, totalPlayers) {
     const { theme } = this.props;
-    const player = classNames(theme[`p${index}`]);
+    const player = classNames(theme[`p${(index%totalPlayers)}`]);
     return (
-      <div className={player}>
+      <div className={player} key={`avatar_${index}`}>
         <Chip theme={theme}>
           <Avatar style={{backgroundColor: 'deepskyblue'}} title={name} />
           <span>{name}</span>
@@ -27,10 +28,11 @@ export default class PlayerAvatars extends Component {
   }
   
   render() {
-    const { theme, players } = this.props;
+    const { theme, players, playerIndex } = this.props;
+    const totalPlayers = players.length;
     return (
       <div className={theme.container}>
-        { players.map((p, i) => this.renderAvatar(p.name, i)) }
+        { players.map((p, i) => this.renderAvatar(p.name, i + (totalPlayers-playerIndex), totalPlayers)) }
       </div>
     );
   }

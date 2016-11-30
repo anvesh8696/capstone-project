@@ -15,10 +15,18 @@ export function updatePiles(piles, boundry) {
   return nPiles;
 }
 
-export function updateCards(piles, cards) {
+export function updateCards(piles, cards, playerIndex, totalPlayers) {
   let i = 0;
-  return cards.map((c) => organize((i++), c, piles[c.pile], cards));
+  // return cards.map((c) => organize((i++), c, piles[c.pile], cards));
+  return cards.map((c) => organize((i++), c, piles[getRotatedPile(c.pile, playerIndex, totalPlayers)], cards));
 }
+
+const getRotatedPile = function (pile, playerIndex, totalPlayers) {
+  if(pile > totalPlayers - 1){
+    return pile;
+  }
+  return (pile + totalPlayers - playerIndex) % totalPlayers;
+};
 
 export function organize(i, card, pile, cards){
   if(pile.o == 'ROW'){
@@ -39,7 +47,7 @@ export function orgainizePile(i, card, pile){
 export function orgainizeRow(i, card, pile, cards){
   let pileCards = cardsInPile(cards, card.pile);
   let cw = card.scale * CARD_WIDTH * 0.5;
-  let x = pile.x - ((pileCards * cw * 0.5) - cw);
+  let x = pile.x - (((pileCards - 1) * cw) * 0.5);
   let k = cardIndexInPile(cards, card.key, card.pile);
   return card.merge({
     x : x + (k * cw),
@@ -63,18 +71,16 @@ export function cardIndexInPile(cards, cardID, pileID){
   let i = 0;
   each(cards, (c) => {
     if(c.pile == pileID){
-      i++;
       if(c.key == cardID){
         return false;
       }
+      i++;
     }
   });
   return i;
 }
 
 export function isCardInPile(card, pileID){
-  //let card = findIndex(cards, (c) => { return c.cardID == c.key; });
-  //return card.pile === pileID;
   return card.pile === pileID;
 }
 
