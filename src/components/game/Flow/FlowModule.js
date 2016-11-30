@@ -1,7 +1,7 @@
 import { handleActions, createAction } from 'redux-actions';
-import { random } from 'lodash';
-import { generateCards, generatePiles, generatePileDefs } from 'components/Deck/CardUtil';
-import Immutable from 'seamless-immutable';
+import { random, findIndex } from 'lodash';
+import { isBot, getPlayerIndex, getPlayerID, getNextPlayerID } from 'utils/RoomUtil';
+import { generateGame } from 'utils/GameUtil';
 
 // ------------------------------------
 // Constants
@@ -20,7 +20,6 @@ export const ROOM_START_ROUND = 'ROOM_START_ROUND';
 // REMOTE SYNC
 //export const PLAYER_DRAW_CARD = 'PLAYER_DRAW_CARD';
 export const PLAYER_TURN_END = 'PLAYER_TURN_END';
-export const PLAYER_TURN_START = 'PLAYER_TURN_START';
 export const UPDATE_GAME = 'UPDATE_GAME';
 
 
@@ -31,8 +30,8 @@ export const createRoom = createAction(CREATE_ROOM);
 export const joinRoom = createAction(JOIN_ROOM);
 export const setupRoundSuccess = createAction(`${SETUP_ROUND}_SUCCESS`);
 export const updateGameSuccess = createAction(`${UPDATE_GAME}_SUCCESS`);
-export const playerTurnStart = createAction(PLAYER_TURN_START);
-export const playerTurnEnd = createAction(PLAYER_TURN_END);
+//export const playerTurnEnd = createAction(PLAYER_TURN_END);
+export const playerTurnEndSuccess = createAction(`${PLAYER_TURN_END}_SUCCESS`);
 
 // ------------------------------------
 // ASYNC Actions
@@ -43,9 +42,9 @@ export function setupRound(node) {
     const { deckID, deal, teamMode } = room;
     
     //TODO Get ID's from Socket or Local
-    let player2 = {name:'FillB', id:random(0, 99999)};
-    let player3 = {name:'AshleyB', id:random(0, 99999)};
-    let player4 = {name:'BrianB', id:random(0, 99999)};
+    let player2 = {name:'FillB', id:random(0, 99999), bot:true};
+    let player3 = {name:'AshleyB', id:random(0, 99999), bot:true};
+    let player4 = {name:'BrianB', id:random(0, 99999), bot:true};
     let players = [me, player2, player3, player4];
     
     let nRoom = room.merge({
@@ -79,6 +78,21 @@ export function mergeGame(value, sendRemote = false){
   };
 }
 
+export function playerTurnEnd(playerID) {
+  return function (dispatch, getState) {
+    const { room } = getState()[FLOW_STATE];
+    let players = room.players;
+    let nextPlayerID = getNextPlayerID(players, playerID);
+    
+    dispatch(playerTurnEndSuccess(nextPlayerID));
+    
+    // bot control
+    if(isBot(players, nextPlayerID)){
+      setTimeout(() => think(dispatch, getState, nextPlayerID), 1000);
+    }
+  };
+}
+
 export const actions = {
 };
 
@@ -108,37 +122,14 @@ const rLabel = function (label){
   return label + '$' + random(0, 99999);
 };
 
-const randomTeams = function (teamMode, players) {
-  if(teamMode == '1v1v1v1'){
-    return [
-      players[0].id, players[1].id, players[2].id, players[3].id
-    ];
-  }
-  return [
-    [players[0].id, players[2].id],
-    [players[1].id, players[3].id]
-  ];
-};
-
-const generateGame = function (deckID, handSize, teamMode, players, playerID, node) {
-  let teams = randomTeams(teamMode, players);
-  let cards = generateCards(deckID);
-  let defs = generatePileDefs(deckID);
-  let game = generatePiles(defs, cards, handSize, teams, players, playerID, node);
-  //cards = deal(game.cards, players, node, handSize = 7);
+const think = function (dispatch, getState, playerID) {
+  //const { players } = getState()[FLOW_STATE].room;
+  //let nextPlayerID = getNextPlayerID(players, playerID);
   
-  return Immutable({
-    piles: game.piles,
-    cards : game.cards,
-    teams: teams,
-    pileDefs: defs
-  });
-};
-
-const handlePlayerTurnEnd = function (state, playerID) {
-  let total = state.room.players.length;
-  let value = (playerID + 1) % total;
-  return state.setIn(['room','playerTurn'], value);
+  //TODO: add bot logic
+  
+  // end bot turn
+  dispatch(playerTurnEnd(playerID));
 };
 
 
@@ -151,7 +142,7 @@ export const flowReducer = handleActions({
   //[`${SETUP_ROUND}_SUCCESS`]: (state, action) => ({...state, ...action.payload}),
   [`${SETUP_ROUND}_SUCCESS`]: (state, action) => (state.merge(action.payload, {deep: true})),
   [`${UPDATE_GAME}_SUCCESS`]: (state, action) => (state.merge(action.payload, {deep: true})),
-  [PLAYER_TURN_END]: (state, action) => handlePlayerTurnEnd(state, action.payload)
+  [`${PLAYER_TURN_END}_SUCCESS`]: (state, action) => state.setIn(['room','playerTurn'], action.payload)
   //({...state, room: action.payload})
 }, initialState);
 

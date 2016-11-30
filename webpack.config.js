@@ -82,7 +82,8 @@ var conf = {
   ],
   resolve: {
     alias: {
-      'components': path.resolve(SRC_PATH, 'components')
+      'components': path.resolve(SRC_PATH, 'components'),
+      'utils': path.resolve(SRC_PATH, 'utils')
     }
   }
 };
