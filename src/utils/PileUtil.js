@@ -76,6 +76,11 @@ export function cardIndexInPile(cards, cardID, pileID){
     }
   });
   return i;
+  // return findIndex(cards, { key: cardID, pile: pileID});
+}
+
+export function cardIndex(cards, cardID){
+  return findIndex(cards, {'key': cardID});
 }
 
 export function isCardInPile(card, pileID){

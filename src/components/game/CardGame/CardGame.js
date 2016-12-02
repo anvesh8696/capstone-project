@@ -1,13 +1,11 @@
 import React, { Component, PropTypes, findDOMNode } from 'react';
-import ReactDOM from 'react-dom';
-import { findIndex } from 'lodash';
 import { themr } from 'react-css-themr';
 import defaultTheme from './CardGame.scss';
 import Deck from 'components/Deck/Deck';
 import deckTheme from 'components/Deck/Deck.scss';
 import PlayerButtonBar from 'components/PlayerButtonBar';
-import { organize, isCardInPile } from 'utils/PileUtil';
-import { each, random } from 'lodash';
+import { cardIndex, isCardInPile, updateCards } from 'utils/PileUtil';
+import { each, random, findLastIndex, findLast } from 'lodash';
 import PlayerAvatars from 'components/PlayerAvatars';
 import { getPlayerIndex, isPlayerTurn } from 'utils/RoomUtil';
 import { updateCard, getDrawPileIndex, getDiscardPileIndex, getPileCards, getSelectedCards } from 'utils/GameUtil';
@@ -45,52 +43,88 @@ class CardGame extends Component {
   
   handleDraw = () => {
     const { id } = this.props.me;
+    const { piles, pileDefs } = this.props.game;
+    let { cards } = this.props.game;
+    
     if(isPlayerTurn(this.props.room, id)){
-      let draw = getDrawPileIndex(this.props.game.pileDefs);
-      let cards = getPileCards(this.props.game.cards, draw);
-      if(cards.length > 0){
-        let c = cards[cards.length - 1].merge({
-          pile: getPlayerIndex(this.props.room.players, id),
-          flipped: false
-        });
-        updateCard(this.props.game.cards, c, this.props.updateGame);
+      let draw = getDrawPileIndex(pileDefs);
+      let cardsB = getPileCards(cards, draw);
+      if(cardsB.length > 0){
+        let playerPile = getPlayerIndex(this.props.room.players, id);
+        let c = findLast(cards, { pile: draw });
+        let insert = findLastIndex(cards, { pile: playerPile }) + 1;
+        cards = this.insertCard(cards, c.merge({
+          pile: playerPile,
+          flipped: false,
+          selected: false,
+          angleOffset: 0
+        }), insert);
         
         // make sure player cards are unselected
-        let pile = getPlayerIndex(this.props.room.players, id);
-        cards = getSelectedCards(this.props.game.cards, pile);
-        each(cards, (c) => {
-          if(c.selected){
-            updateCard(this.props.game.cards, c.merge({
-              selected: false
-            }), this.props.updateGame);
-          }
-        });
-        
+        cards = cards.map((c) => c.pile == playerPile ? c.merge({selected: false}) : c);
+        cards = updateCards(piles, cards, playerPile, this.props.room.players.length);
+        this.props.updateGame(['game', 'cards'], cards);
         this.props.playerTurnEnd(id);
-        window.dispatchEvent(new Event('resize'));
       }
     }
   }
   
   handleDone = () => {
     const { id } = this.props.me;
+    const { pileDefs, piles } = this.props.game;
+    let { cards } = this.props.game;
+    
     if(isPlayerTurn(this.props.room, id)){
       let pile = getPlayerIndex(this.props.room.players, id);
-      let cards = getSelectedCards(this.props.game.cards, pile);
-      let discard = getDiscardPileIndex(this.props.game.pileDefs);
-      each(cards, (c) => {
-        updateCard(this.props.game.cards, c.merge({
+      let selected = getSelectedCards(cards, pile);
+      let discard = getDiscardPileIndex(pileDefs);
+      each(selected, (c) => {
+        let insert = findLastIndex(cards, { pile: discard }) + 1;
+        cards = this.insertCard(cards, c.merge({
           pile: discard,
           flipped: false,
-          selected: false, 
+          selected: false,
           angleOffset: random(0, 45)
-        }), this.props.updateGame);
+        }), insert);
       });
-      if(cards.length > 0){
+      if(selected.length > 0){
+        cards = updateCards(piles, cards, pile, this.props.room.players.length);
+        this.props.updateGame(['game', 'cards'], cards);
         this.props.playerTurnEnd(id);
-        window.dispatchEvent(new Event('resize'));
       }
     }
+  }
+  
+  insertCard(cards, card, insertIndex, updateGame) {
+    let prev = null;
+    let b = null;
+    let oldIndex = cardIndex(cards, card.key);
+    
+    // Remove the prev position
+    if(oldIndex != -1){
+      cards = cards.slice(0, oldIndex).concat(cards.slice(oldIndex + 1));
+    }
+    
+    // Insert at index and shift other cards
+    cards = cards.map(function (value, index) {
+      if(index < insertIndex){
+        return value;
+      } else if (index == insertIndex) {
+        prev = value;
+        return card;
+      } else {
+        b = prev;
+        prev = value;
+        return b;
+      }
+    });
+    
+    // Add the tail card back into the array
+    if(prev && prev != cards[cards.length - 1]){
+      cards = cards.concat([prev]);
+    }
+    return cards;
+    //updateGame(['game', 'cards'], cards);
   }
 
   render() {
