@@ -6,7 +6,7 @@ import defaultTheme from './CardGame.scss';
 import Deck from 'components/Deck/Deck';
 import deckTheme from 'components/Deck/Deck.scss';
 import PlayerButtonBar from 'components/PlayerButtonBar';
-import { organize, isCardInPile } from 'components/Deck/PileUtil';
+import { organize, isCardInPile } from 'utils/PileUtil';
 import { each, random } from 'lodash';
 import PlayerAvatars from 'components/PlayerAvatars';
 import { getPlayerIndex, isPlayerTurn } from 'utils/RoomUtil';
@@ -27,10 +27,8 @@ class CardGame extends Component {
   }
   
   handleCardClick = (card) => {
-    
     const { id } = this.props.me;
     let pile = getPlayerIndex(this.props.room.players, id);
-    console.log(pile, id, this.props.room, isPlayerTurn(this.props.room, id), isCardInPile(card, pile))
     // Player's cards are only clickable when it's their turn
     if(isPlayerTurn(this.props.room, id) && isCardInPile(card, pile)){
       updateCard(this.props.game.cards, {...card, selected: !card.selected}, this.props.updateGame);
@@ -96,13 +94,15 @@ class CardGame extends Component {
   }
 
   render() {
-    const { theme, game } = this.props;
+    const { theme, game, room } = this.props;
     const { players } = this.props.room;
     const { id } = this.props.me;
+    const { playerTurn } = room;
     const playerIndex = getPlayerIndex(players, id);
+    const playerTurnIndex = getPlayerIndex(players, playerTurn);
     return (
       <div className={theme.page}>
-        <PlayerAvatars players={players} playerIndex={playerIndex}/>
+        <PlayerAvatars players={players} playerIndex={playerIndex} playerTurnIndex={playerTurnIndex} />
         <PlayerButtonBar onDraw={this.handleDraw} onDone={this.handleDone}/>
         <Deck ref="deck"
           action={''}

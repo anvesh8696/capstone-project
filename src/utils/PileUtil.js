@@ -1,8 +1,6 @@
 import { random, each, findIndex } from 'lodash';
+import { CARD_WIDTH, CARD_HEIGHT } from 'utils/CardUtil';
 //import Immutable from 'seamless-immutable';
-
-export const CARD_WIDTH = 150;
-export const CARD_HEIGHT = 220;
 
 export function updatePiles(piles, boundry) {
   let nPiles = piles;

@@ -4,6 +4,12 @@ export function isPlayerTurn(room, playerID) {
   return room.playerTurn === playerID;
 }
 
+export function isTeammate(playerID, id, teams) {
+  let teamID = findIndex(teams, (t) => { return t.indexOf(playerID) != -1; });
+  let team = teams[teamID];
+  return team && team.indexOf(id) != -1;
+}
+
 export function getPlayerIndex(players, playerID) {
   return findIndex(players, (p) => p.id == playerID);
 }
@@ -19,14 +25,7 @@ export function getNextPlayerID(players, playerID){
 }
 
 export function isBot(players, playerID) {
-  // if(playerIndex >= 0 && players.length > playerIndex){
-  //   let p = players[playerIndex];
-  //   console.log('isBot', playerIndex, p);
-  //   return p.hasOwnProperty('bot') ? p.bot : false;
-  // }
-  // return false;
   let playerIndex = getPlayerIndex(players, playerID);
   let p = players[playerIndex];
-  console.log('inside, isBot', playerIndex, p);
   return p.hasOwnProperty('bot') ? p.bot : false;
 }

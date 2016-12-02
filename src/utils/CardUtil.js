@@ -1,8 +1,10 @@
 import { chain, findIndex, concat, chunk, random, sortBy, each, shuffle as shuf } from 'lodash';
 import Immutable from 'seamless-immutable';
-import { CARD_WIDTH, CARD_HEIGHT } from './Deck';
-import { cardDefaults, cardDealDefaults } from './DeckCard';
-import Pile from 'components/Deck/Pile';
+import { cardDefaults, cardDealDefaults } from 'components/Deck/DeckCard';
+import { isTeammate } from 'utils/RoomUtil';
+
+export const CARD_WIDTH = 150;
+export const CARD_HEIGHT = 220;
 
 export function generateCards(deckID){
   const {suits, types} = findDeckInfo(deckID);
@@ -67,12 +69,6 @@ export function generatePiles(pileDefs, cards, deal, teams, players, playerID, n
   });
   return {cards: nCards, piles: piles};
 }
-
-const isTeammate = (playerID, id, teams) => {
-  let teamID = findIndex(teams, (t) => { return t.indexOf(playerID) != -1; });
-  let team = teams[teamID];
-  return team && team.indexOf(id) != -1;
-};
 
 const createPiles = (pileDefs, total) => {
   let piles = {};

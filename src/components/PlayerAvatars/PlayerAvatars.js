@@ -11,12 +11,16 @@ export default class PlayerAvatars extends Component {
   static propTypes = {
     theme: PropTypes.object.isRequired,
     players: PropTypes.array.isRequired,
-    playerIndex: PropTypes.number.isRequired
+    playerIndex: PropTypes.number.isRequired,
+    playerTurnIndex: PropTypes.number.isRequired
   }
   
   renderAvatar(name, index, totalPlayers) {
-    const { theme } = this.props;
-    const player = classNames(theme[`p${(index%totalPlayers)}`]);
+    const { theme, playerTurnIndex } = this.props;
+    const player = classNames(
+      theme[`p${(index%totalPlayers)}`],
+      playerTurnIndex == (index%totalPlayers) ? theme.selected : ''
+    );
     return (
       <div className={player} key={`avatar_${index}`}>
         <Chip theme={theme}>

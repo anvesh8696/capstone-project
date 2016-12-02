@@ -62,9 +62,10 @@ export function setupRound(node) {
 
 export function updateGame(keys, value, sendRemote = false){
   return function (dispatch, getState) {
-    const { game } = getState()[FLOW_STATE];
-    let nGame = game.setIn(keys, value);
-    dispatch(updateGameSuccess({game: nGame}));
+    //const { game } = getState()[FLOW_STATE];
+    //let nGame = game.setIn(keys, value);
+    //dispatch(updateGameSuccess({game: nGame}));
+    dispatch(updateGameSuccess({keys: keys, value:value}));
     //TODO If sendRemote send nGame
   };
 }
@@ -132,6 +133,17 @@ const think = function (dispatch, getState, playerID) {
   dispatch(playerTurnEnd(playerID));
 };
 
+const handleUpdateGameSuccess = function (state, action) {
+  //const { game } = state;
+  
+  if(action.payload.keys){
+    const { keys, value } = action.payload;
+    return state.setIn(keys, value);
+  }
+  return state.merge(action.payload, {deep: true});
+    //let nGame = game.setIn(keys, value);
+    //(state.merge(action.payload, {deep: true}))
+};
 
 // ------------------------------------
 // Reducer
@@ -141,7 +153,7 @@ export const flowReducer = handleActions({
   [JOIN_ROOM]: (state, action) => ({...state, room: action.payload}),
   //[`${SETUP_ROUND}_SUCCESS`]: (state, action) => ({...state, ...action.payload}),
   [`${SETUP_ROUND}_SUCCESS`]: (state, action) => (state.merge(action.payload, {deep: true})),
-  [`${UPDATE_GAME}_SUCCESS`]: (state, action) => (state.merge(action.payload, {deep: true})),
+  [`${UPDATE_GAME}_SUCCESS`]: (state, action) => handleUpdateGameSuccess(state, action),
   [`${PLAYER_TURN_END}_SUCCESS`]: (state, action) => state.setIn(['room','playerTurn'], action.payload)
   //({...state, room: action.payload})
 }, initialState);

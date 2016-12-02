@@ -1,6 +1,6 @@
 import Immutable from 'seamless-immutable';
 import { findIndex, each } from 'lodash';
-import { generateCards, generatePiles, generatePileDefs } from 'components/Deck/CardUtil';
+import { generateCards, generatePiles, generatePileDefs } from 'utils/CardUtil';
 
 export function generateGame(deckID, handSize, teamMode, players, playerID, node) {
   let teams = randomTeams(teamMode, players);
@@ -49,7 +49,7 @@ export function getDrawPileIndex(pileDefs) {
 
 export function updateCard(cards, card, updateGame) {
   let indexToUpdate = findIndex(cards, (o) => o.key == card.key);
-  updateGame(['cards', indexToUpdate], card);
+  updateGame(['game', 'cards', indexToUpdate], card);
 }
 
 const randomTeams = function (teamMode, players) {
