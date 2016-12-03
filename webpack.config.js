@@ -55,6 +55,10 @@ var conf = {
         include: [
           SRC_PATH
         ]
+      },
+      {
+        test: /\.svg$/,
+        loader: 'babel!svg-react'
       }
     ]
   },
@@ -83,7 +87,8 @@ var conf = {
   resolve: {
     alias: {
       'components': path.resolve(SRC_PATH, 'components'),
-      'utils': path.resolve(SRC_PATH, 'utils')
+      'utils': path.resolve(SRC_PATH, 'utils'),
+      'static': path.resolve(ROOT_PATH, 'static')
     }
   }
 };

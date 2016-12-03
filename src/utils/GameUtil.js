@@ -26,6 +26,11 @@ export function getPileCards(cards, pile) {
   return filter(cards, {'pile': pile});
 }
 
+export function getLastDiscard(cards, pileDefs) {
+  let prevCard = getPileCards(cards, getDiscardPileIndex(pileDefs));
+  return prevCard[prevCard.length - 1];
+}
+
 export function getDiscardPileIndex(pileDefs) {
   return 5;
   return pileDefs.length - 1;

@@ -1,5 +1,6 @@
-import { random, each, findIndex } from 'lodash';
+import { random, each, findIndex, findLastIndex, findLast } from 'lodash';
 import { CARD_WIDTH, CARD_HEIGHT } from 'utils/CardUtil';
+import { getDrawPileIndex, getPileCards } from 'utils/GameUtil';
 //import Immutable from 'seamless-immutable';
 
 export function updatePiles(piles, boundry) {
@@ -86,10 +87,56 @@ export function cardIndex(cards, cardID){
 export function isCardInPile(card, pileID){
   return card.pile === pileID;
 }
-
-export function insertCard(){
   
-  //each card
-  //check if this is the insert position
-  //splice and break
+export function insertCard(cards, card, insertIndex) {
+  let prev = null;
+  let b = null;
+  let oldIndex = cardIndex(cards, card.key);
+  
+  // Remove the prev position
+  if(oldIndex != -1){
+    cards = cards.slice(0, oldIndex).concat(cards.slice(oldIndex + 1));
+  }
+  
+  // Insert at index and shift other cards
+  cards = cards.map(function (value, index) {
+    if(index < insertIndex){
+      return value;
+    } else if (index == insertIndex) {
+      prev = value;
+      return card;
+    } else {
+      b = prev;
+      prev = value;
+      return b;
+    }
+  });
+  
+  // Add the tail card back into the array
+  if(prev && prev != cards[cards.length - 1]){
+    cards = cards.concat([prev]);
+  }
+  return cards;
+}
+
+export function addCardsToPile(cards, newCards, pile, flipped = false, randomAngle = false) {
+  each(newCards, (c) => {
+    let insert = findLastIndex(cards, { pile: pile }) + 1;
+    cards = insertCard(cards, c.merge({
+      pile: pile,
+      flipped: flipped,
+      selected: false,
+      angleOffset: randomAngle ? random(0, 45) : 0
+    }), insert);
+  });
+  return cards;
+}
+  
+export function addDrawCardToPile(cards, piles, pileDefs, pile, flipped = false) {
+  let draw = getDrawPileIndex(pileDefs);
+  let c = findLast(cards, { pile: draw });
+  if(c){
+    cards = addCardsToPile(cards, [c], pile, flipped, false);
+  }
+  return cards;
 }

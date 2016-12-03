@@ -16,11 +16,18 @@ class Room extends Component {
     buttonAction: PropTypes.func.isRequired,
     setupRound: PropTypes.func.isRequired,
     updateGame: PropTypes.func.isRequired,
-    playerTurnEnd: PropTypes.func.isRequired
+    playerTurnEnd: PropTypes.func.isRequired,
+    router: React.PropTypes.shape({
+      push: React.PropTypes.func.isRequired
+    }).isRequired
   }
   
   componentDidMount() {
     this.props.setupRound(findDOMNode(this.refs.game));
+  }
+  
+  handleOnDone = () => {
+    this.props.router.push('/');
   }
 
   render() {
@@ -28,7 +35,7 @@ class Room extends Component {
     return (
       <Panel>
         <AppBar flat title={`Room: ${params.roomID}`}/>
-        <CardGame ref="game" {...this.props}/>
+        <CardGame ref="game" {...this.props} onDone={this.handleOnDone}/>
       </Panel>
     );
   }

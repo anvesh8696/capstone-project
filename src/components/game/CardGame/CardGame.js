@@ -1,14 +1,17 @@
 import React, { Component, PropTypes, findDOMNode } from 'react';
+import ReactDOM from 'react-dom';
+import { findIndex } from 'lodash';
 import { themr } from 'react-css-themr';
 import defaultTheme from './CardGame.scss';
 import Deck from 'components/Deck/Deck';
 import deckTheme from 'components/Deck/Deck.scss';
 import PlayerButtonBar from 'components/PlayerButtonBar';
-import { cardIndex, isCardInPile, updateCards } from 'utils/PileUtil';
+import { cardIndex, isCardInPile, updateCards, addCardsToPile, addDrawCardToPile } from 'utils/PileUtil';
 import { each, random, findLastIndex, findLast } from 'lodash';
 import PlayerAvatars from 'components/PlayerAvatars';
 import { getPlayerIndex, isPlayerTurn } from 'utils/RoomUtil';
-import { updateCard, getDrawPileIndex, getDiscardPileIndex, getPileCards, getSelectedCards } from 'utils/GameUtil';
+import { updateCard, getDrawPileIndex, getDiscardPileIndex, getLastDiscard, getSelectedCards } from 'utils/GameUtil';
+import GameOverModal from 'components/ui/modal/GameOverModal';
 
 @themr('CardGame', defaultTheme)
 class CardGame extends Component {
@@ -21,15 +24,28 @@ class CardGame extends Component {
     buttonAction: PropTypes.func.isRequired,
     updateGame: PropTypes.func.isRequired,
     mergeGame: PropTypes.func.isRequired,
-    playerTurnEnd: PropTypes.func.isRequired
+    playerTurnEnd: PropTypes.func.isRequired,
+    onDone: PropTypes.func.isRequired
   }
   
   handleCardClick = (card) => {
     const { id } = this.props.me;
+    const { cards, pileDefs } = this.props.game;
+    
     let pile = getPlayerIndex(this.props.room.players, id);
     // Player's cards are only clickable when it's their turn
     if(isPlayerTurn(this.props.room, id) && isCardInPile(card, pile)){
-      updateCard(this.props.game.cards, {...card, selected: !card.selected}, this.props.updateGame);
+      
+      let prevCard = getLastDiscard(cards, pileDefs);
+      
+      // must match prev card suit or value
+      if(prevCard){
+        if(card.suit != prevCard.suit && card.value != prevCard.value){
+          return;
+        }
+      }
+      
+      updateCard(cards, {...card, selected: !card.selected}, this.props.updateGame);
     }
   }
   
@@ -47,25 +63,16 @@ class CardGame extends Component {
     let { cards } = this.props.game;
     
     if(isPlayerTurn(this.props.room, id)){
-      let draw = getDrawPileIndex(pileDefs);
-      let cardsB = getPileCards(cards, draw);
-      if(cardsB.length > 0){
-        let playerPile = getPlayerIndex(this.props.room.players, id);
-        let c = findLast(cards, { pile: draw });
-        let insert = findLastIndex(cards, { pile: playerPile }) + 1;
-        cards = this.insertCard(cards, c.merge({
-          pile: playerPile,
-          flipped: false,
-          selected: false,
-          angleOffset: 0
-        }), insert);
-        
-        // make sure player cards are unselected
-        cards = cards.map((c) => c.pile == playerPile ? c.merge({selected: false}) : c);
-        cards = updateCards(piles, cards, playerPile, this.props.room.players.length);
-        this.props.updateGame(['game', 'cards'], cards);
-        this.props.playerTurnEnd(id);
-      }
+      let playerPile = getPlayerIndex(this.props.room.players, id);
+      
+      cards = addDrawCardToPile(cards, piles, pileDefs, playerPile, false);
+      
+      // make sure player cards are unselected
+      cards = cards.map((c) => c.pile == playerPile ? c.merge({selected: false}) : c);
+      cards = updateCards(piles, cards, playerPile, this.props.room.players.length);
+      
+      this.props.updateGame(['game', 'cards'], cards);
+      this.props.playerTurnEnd(id);
     }
   }
   
@@ -78,15 +85,9 @@ class CardGame extends Component {
       let pile = getPlayerIndex(this.props.room.players, id);
       let selected = getSelectedCards(cards, pile);
       let discard = getDiscardPileIndex(pileDefs);
-      each(selected, (c) => {
-        let insert = findLastIndex(cards, { pile: discard }) + 1;
-        cards = this.insertCard(cards, c.merge({
-          pile: discard,
-          flipped: false,
-          selected: false,
-          angleOffset: random(0, 45)
-        }), insert);
-      });
+      
+      cards = addCardsToPile(cards, selected, discard, false, true);
+      
       if(selected.length > 0){
         cards = updateCards(piles, cards, pile, this.props.room.players.length);
         this.props.updateGame(['game', 'cards'], cards);
@@ -94,48 +95,17 @@ class CardGame extends Component {
       }
     }
   }
-  
-  insertCard(cards, card, insertIndex, updateGame) {
-    let prev = null;
-    let b = null;
-    let oldIndex = cardIndex(cards, card.key);
-    
-    // Remove the prev position
-    if(oldIndex != -1){
-      cards = cards.slice(0, oldIndex).concat(cards.slice(oldIndex + 1));
-    }
-    
-    // Insert at index and shift other cards
-    cards = cards.map(function (value, index) {
-      if(index < insertIndex){
-        return value;
-      } else if (index == insertIndex) {
-        prev = value;
-        return card;
-      } else {
-        b = prev;
-        prev = value;
-        return b;
-      }
-    });
-    
-    // Add the tail card back into the array
-    if(prev && prev != cards[cards.length - 1]){
-      cards = cards.concat([prev]);
-    }
-    return cards;
-    //updateGame(['game', 'cards'], cards);
-  }
 
   render() {
-    const { theme, game, room } = this.props;
-    const { players } = this.props.room;
+    const { theme, game, room, onDone } = this.props;
+    const { players, winner } = this.props.room;
     const { id } = this.props.me;
     const { playerTurn } = room;
     const playerIndex = getPlayerIndex(players, id);
     const playerTurnIndex = getPlayerIndex(players, playerTurn);
     return (
       <div className={theme.page}>
+        <GameOverModal open={room.isGameOver} winner={winner} onDone={onDone}/>
         <PlayerAvatars players={players} playerIndex={playerIndex} playerTurnIndex={playerTurnIndex} />
         <PlayerButtonBar onDraw={this.handleDraw} onDone={this.handleDone}/>
         <Deck ref="deck"

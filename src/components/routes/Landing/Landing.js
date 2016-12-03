@@ -1,13 +1,13 @@
 import React, { Component, PropTypes } from 'react';
-import { AppBar, Panel, Sidebar } from 'react-toolbox';
+import { Panel} from 'react-toolbox';
 import { themr } from 'react-css-themr';
 import defaultTheme from './Landing.scss';
-import Deck from 'components/Deck/Deck';
 import Input from 'react-toolbox/lib/input';
 import Dialog from 'react-toolbox/lib/dialog';
-import {Button, IconButton} from 'react-toolbox/lib/button';
-import {Tab, Tabs} from 'react-toolbox';
+import { Button } from 'react-toolbox/lib/button';
+import { Tab, Tabs } from 'react-toolbox';
 import { random } from 'lodash';
+import AvatarPicker from 'components/ui/button/AvatarPicker';
 
 @themr('Landing', defaultTheme)
 class Landing extends Component {
@@ -22,7 +22,11 @@ class Landing extends Component {
     state = {
       code: '',
       codeError: '',
-      index: 0
+      index: 0,
+      player0: false,
+      player1: true,
+      player2: true,
+      player3: true,
     }
     
     handleChange = (name, value) => {
@@ -57,6 +61,10 @@ class Landing extends Component {
     handleCodeInput = (e) => {
       //e.keyCode
     }
+    
+    handlePlayerChange = (field, value) => {
+      this.setState({...this.state, [field]: value});
+    };
   
     render() {
       const { theme } = this.props;
@@ -66,8 +74,16 @@ class Landing extends Component {
             <Dialog active={Boolean(true)}>
               <Tabs index={this.state.index} onChange={this.handleTabChange}>
                 <Tab label="Create Room">
-                  <small>Choose how you want to play</small>
-                  <Button label="Create!" raised primary onClick={this.handleCreateRoom}/>
+                  <small>Choose avatar and which opponents are bots</small>
+                  <div className={theme.avatars}>
+                    <AvatarPicker botToggle={false}/>
+                    <AvatarPicker />
+                    <AvatarPicker />
+                    <AvatarPicker />
+                  </div>
+                  <div className={theme.buttons}>
+                    <Button label="Create!" raised primary onClick={this.handleCreateRoom}/>
+                  </div>
                 </Tab>
                 <Tab label="Join Room">
                   <Input
@@ -82,10 +98,12 @@ class Landing extends Component {
                     maxLength={15}
                     className={theme.code}
                   />
-                  <Button label="Join!" raised primary
-                    onClick={this.handleJoinRoom}
-                    disabled={this.state.codeError != ''}
-                  />
+                  <div className={theme.buttons}>
+                    <Button label="Join!" raised primary
+                      onClick={this.handleJoinRoom}
+                      disabled={this.state.codeError != ''}
+                    />
+                  </div>
                 </Tab>
               </Tabs>
             </Dialog>

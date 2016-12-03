@@ -20,7 +20,7 @@ export function generateCards(deckID){
       scale: 0.5
     });
   }
-  return Immutable(c);
+  return Immutable(shuf(c));
 }
 
 export function generatePiles(pileDefs, cards, deal, teams, players, playerID, node) {
