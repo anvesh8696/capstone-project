@@ -17,8 +17,8 @@ class Room extends Component {
     setupRound: PropTypes.func.isRequired,
     updateGame: PropTypes.func.isRequired,
     playerTurnEnd: PropTypes.func.isRequired,
-    router: React.PropTypes.shape({
-      push: React.PropTypes.func.isRequired
+    router: PropTypes.shape({
+      push: PropTypes.func.isRequired
     }).isRequired
   }
   

@@ -1,0 +1,37 @@
+.dialog {
+  min-height: 360px;
+}
+
+.buttons {
+  text-align: right;
+}
+
+.code {
+  flex: 1;
+  padding-bottom: 5rem;
+}
+
+.avatars {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  // padding: 1em 0;
+  text-align: center;
+}
+
+.body {
+  flex: 1;
+  display: flex;
+}
+
+.tabBody {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.tabs, .tab {
+  flex: 1;
+}

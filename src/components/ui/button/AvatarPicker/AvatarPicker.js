@@ -19,28 +19,37 @@ class AvatarPicker extends Component {
   
     static propTypes = {
       theme: PropTypes.object.isRequired,
-      botToggle: PropTypes.bool.isRequired
+      picker: PropTypes.bool.isRequired,
+      botToggle: PropTypes.bool.isRequired,
+      isBot: PropTypes.bool.isRequired,
+      value: PropTypes.number.isRequired,
+      onChange: PropTypes.func.isRequired
     }
     
     static defaultProps = {
-      botToggle: true
+      picker: true,
+      botToggle: true,
+      isBot: false,
+      value: 0
     }
     
-    state = {
-      avatar: 0,
-      isBot: false
-    }
-    
-    renderAvatar(avatarIndex, botToggle, isBot){
+    renderAvatar(theme, avatarIndex, picker, botToggle, isBot){
       let AvatarSvg = !isBot || !botToggle ? Avatarlist[avatarIndex] : AvatarBot;
+      if(picker){
+        return (
+          <IconButton primary theme={theme} onClick={this.handleAvatarClick}>
+            <AvatarSvg width={100} height={100}/>
+          </IconButton>
+        );
+      }
       return <AvatarSvg width={100} height={100}/>;
     }
     
-    renderBotToggle(shouldRender){
+    renderBotToggle(shouldRender, isBot){
       if(shouldRender){
         return (
           <Switch
-            checked={this.state.isBot}
+            checked={isBot}
             label="Bot"
             onChange={this.handleBotChange}
           />
@@ -49,24 +58,24 @@ class AvatarPicker extends Component {
     }
     
     handleBotChange = () => {
-      let value = this.state.isBot;
-      this.setState({...this.state, isBot: !value});
+      let value = this.props.isBot;
+      //this.setState({...this.state, isBot: !value});
+      this.props.onChange('isBot', !value);
     }
     
     handleAvatarClick = () => {
-      if(!this.state.isBot){
-        let value = (this.state.avatar + 1) % (Avatarlist.length);
-        this.setState({...this.state, avatar: value});
+      if(!this.props.isBot || !this.props.botToggle){
+        let value = (this.props.value + 1) % (Avatarlist.length);
+        this.props.onChange('value', value);
+        //this.setState({...this.state, value: value});
       }
     }
   
     render() {
-      const { theme, botToggle } = this.props;
+      const { theme, botToggle, isBot, value, picker } = this.props;
       return (
         <div className={theme.avatar}>
-          <IconButton primary theme={theme} onClick={this.handleAvatarClick}>
-            {this.renderAvatar(this.state.avatar, botToggle, this.state.isBot)}
-          </IconButton>
+          {this.renderAvatar(theme, value, picker, botToggle, isBot)}
           {this.renderBotToggle(botToggle)}
         </div>
       );

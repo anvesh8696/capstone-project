@@ -15,6 +15,7 @@ export const CREATE_ROOM = 'CREATE_ROOM';
 export const JOIN_ROOM = 'JOIN_ROOM';
 export const SETUP_ROUND = 'SETUP_ROUND';
 export const REPLENISH_DRAW_PILE = 'REPLENISH_DRAW_PILE';
+export const USER_LOGIN = 'USER_LOGIN';
 
 // REMOTE
 export const ROOM_CHECK_READY = 'ROOM_CHECK_READY';
@@ -34,7 +35,7 @@ export const createRoom = createAction(CREATE_ROOM);
 export const joinRoom = createAction(JOIN_ROOM);
 export const setupRoundSuccess = createAction(`${SETUP_ROUND}_SUCCESS`);
 export const updateGameSuccess = createAction(`${UPDATE_GAME}_SUCCESS`);
-//export const playerTurnEnd = createAction(PLAYER_TURN_END);
+export const userLogin = createAction(USER_LOGIN);
 export const playerTurnEndSuccess = createAction(`${PLAYER_TURN_END}_SUCCESS`);
 export const endGame = createAction(END_GAME);
 export const replenishDrawPile = createAction(REPLENISH_DRAW_PILE);
@@ -47,15 +48,11 @@ export function setupRound(node) {
     const { room, me } = getState()[FLOW_STATE];
     const { deckID, deal, teamMode } = room;
     
-    //TODO Get ID's from Socket or Local
-    let player2 = {name:'FillB', id:random(0, 99999), bot:true};
-    let player3 = {name:'AshleyB', id:random(0, 99999), bot:true};
-    let player4 = {name:'BrianB', id:random(0, 99999), bot:true};
-    let players = [me, player2, player3, player4];
     
+    let players = room.players;
     let nRoom = room.merge({
       playerTurn: me.id,
-      players: players,
+      //players: players,
       isGameOver: false,
       winner: ''
     });
@@ -98,12 +95,9 @@ export function playerTurnEnd(playerID) {
     
     dispatch(playerTurnEndSuccess(nextPlayerID));
     
-    console.log('turn end', gameOver, playerID);
-    gameOver = true;
     // check if game is over
     if(gameOver){
       let winner = getPlayerName(players, playerID);
-      console.log('winner', winner);
       dispatch(endGame(winner));
     } else {
       
@@ -124,6 +118,22 @@ export function playerTurnEnd(playerID) {
 export const actions = {
 };
 
+const defaultMe = {
+  id: random(0, 99999),
+  name: 'Jack',
+  avatar: random(0, 6)
+};
+
+//TODO Get ID's from Socket or Local
+const guys = [0,2,4,6];
+const girls = [1,3,5];
+const defaultPlayers = [
+  defaultMe,
+  {name:'Fill', avatar:guys[random(0, guys.length-1)], id:random(0, 99999), bot:true},
+  {name:'Ashley', avatar:girls[random(0, girls.length-1)], id:random(0, 99999), bot:true},
+  {name:'Brian', avatar:guys[random(0, guys.length-1)], id:random(0, 99999), bot:true}
+];
+  
 // ------------------------------------
 // Initial State
 // ------------------------------------
@@ -134,7 +144,7 @@ const initialState = {
     pileDefs: []
   },
   room: {
-    players: [],
+    players: defaultPlayers,
     deckID: 'ELM',
     teamMode: '2V2',
     deal: 7,
@@ -142,10 +152,7 @@ const initialState = {
     isGameOver: false,
     winner: ''
   },
-  me: {
-    id: random(0, 99999),
-    name: 'Jack'
-  }
+  me: defaultMe
 };
 
 const rLabel = function (label){
@@ -201,16 +208,13 @@ const handleUpdateGameSuccess = function (state, action) {
 };
 
 const handleReplenishDrawPile = function (state) {
-  
   const { pileDefs, piles } = state.game;
   const { players } = state.room;
-  //let nextPlayerID = getNextPlayerID(players, playerID);
   let { cards } = state.game;
   let discardPileID = getDiscardPileIndex(pileDefs);
   let drawPileID = getDrawPileIndex(pileDefs);
   let lastDiscardIndex = findLastIndex(cards, { pile: discardPileID });
   
-  console.log('handleReplenishDrawPile', lastDiscardIndex, drawPileID);
   if(lastDiscardIndex != -1){
     cards = cards.map(function (c, index) {
       if(index < lastDiscardIndex){
@@ -228,19 +232,26 @@ const handleReplenishDrawPile = function (state) {
   return state.setIn(['game','cards'], cards);
 };
 
+const handleUserLogin = function (state, name, avatar){
+  let index = 0;
+  return state.setIn(['me','name'], name)
+    .setIn(['me','avatar'], avatar)
+    .setIn(['room','players',index,'name'], name)
+    .setIn(['room','players',index,'avatar'], avatar);
+};
+
 // ------------------------------------
 // Reducer
 // ------------------------------------
 export const flowReducer = handleActions({
   [`${CREATE_ROOM}_SUCCESS`]: (state, action) => ({...state, room: action.payload}),
   [JOIN_ROOM]: (state, action) => ({...state, room: action.payload}),
-  //[`${SETUP_ROUND}_SUCCESS`]: (state, action) => ({...state, ...action.payload}),
   [`${SETUP_ROUND}_SUCCESS`]: (state, action) => (state.merge(action.payload, {deep: true})),
   [`${UPDATE_GAME}_SUCCESS`]: (state, action) => handleUpdateGameSuccess(state, action),
   [`${PLAYER_TURN_END}_SUCCESS`]: (state, action) => state.setIn(['room','playerTurn'], action.payload),
   [END_GAME]: (state, action) => state.setIn(['room','isGameOver'], true).setIn(['room','winner'], action.payload),
-  [REPLENISH_DRAW_PILE]: (state, action) => handleReplenishDrawPile(state)
-  //({...state, room: action.payload})
+  [REPLENISH_DRAW_PILE]: (state, action) => handleReplenishDrawPile(state),
+  [USER_LOGIN]: (state, action) => handleUserLogin(state, action.payload.name, action.payload.avatar)
 }, initialState);
 
 export default flowReducer;
