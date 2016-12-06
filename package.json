@@ -73,6 +73,7 @@
     "phantomjs": "^2.1.7",
     "phantomjs-polyfill": "0.0.2",
     "postcss-loader": "^1.1.0",
+    "pubnub": "^4.3.2",
     "react-addons-css-transition-group": "^15.4.0",
     "react-addons-shallow-compare": "^15.4.0",
     "react-addons-transition-group": "^15.4.0",

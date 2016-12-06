@@ -4,6 +4,9 @@ import { isBot, getPlayerIndex, getNextPlayerID, isTeammate, getPlayerName } fro
 import { generateGame, getDrawPileIndex, getLastDiscard, getDiscardPileIndex, getPileCards } from 'utils/GameUtil';
 import { addCardsToPile, addDrawCardToPile, updateCards, cardsInPile } from 'utils/PileUtil';
 import { getPlayableCard } from 'utils/RuleUtil';
+import MsgUtil from 'utils/MsgUtil';
+import Immutable from 'seamless-immutable';
+import { uuid, findUser } from 'utils/UserUtil';
 
 // ------------------------------------
 // Constants
@@ -43,11 +46,17 @@ export const replenishDrawPile = createAction(REPLENISH_DRAW_PILE);
 // ------------------------------------
 // ASYNC Actions
 // ------------------------------------
-export function setupRound(node) {
+export function setupRound(node, roomID) {
   return function (dispatch, getState) {
     const { room, me } = getState()[FLOW_STATE];
     const { deckID, deal, teamMode } = room;
     
+    
+    // join the room
+    if(msgr.room != roomID){
+      msgr.login(me.id);
+      msgr.join(roomID, me);
+    }
     
     let players = room.players;
     let nRoom = room.merge({
@@ -118,20 +127,17 @@ export function playerTurnEnd(playerID) {
 export const actions = {
 };
 
-const defaultMe = {
-  id: random(0, 99999),
-  name: 'Jack',
-  avatar: random(0, 6)
-};
+const defaultMe = findUser();
+const msgr = new MsgUtil();
 
 //TODO Get ID's from Socket or Local
 const guys = [0,2,4,6];
 const girls = [1,3,5];
 const defaultPlayers = [
   defaultMe,
-  {name:'Fill', avatar:guys[random(0, guys.length-1)], id:random(0, 99999), bot:true},
-  {name:'Ashley', avatar:girls[random(0, girls.length-1)], id:random(0, 99999), bot:true},
-  {name:'Brian', avatar:guys[random(0, guys.length-1)], id:random(0, 99999), bot:true}
+  {name:'Fill', avatar:guys[random(0, guys.length-1)], id:uuid(), bot:true},
+  {name:'Ashley', avatar:girls[random(0, girls.length-1)], id:uuid(), bot:true},
+  {name:'Brian', avatar:guys[random(0, guys.length-1)], id:uuid(), bot:true}
 ];
   
 // ------------------------------------
@@ -150,6 +156,7 @@ const initialState = {
     deal: 7,
     playerTurn: 0,
     isGameOver: false,
+    status: 'WAITING',
     winner: ''
   },
   me: defaultMe

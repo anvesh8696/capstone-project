@@ -14,7 +14,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     buttonAction: (action) => dispatch(playerAction(action)),
-    setupRound: (node) => dispatch(setupRound(node)),
+    setupRound: (node, roomID) => dispatch(setupRound(node, roomID)),
     updateGame: (key, value, sendRemote) => dispatch(updateGame(key, value, sendRemote)),
     mergeGame: (value, sendRemote) => dispatch(mergeGame(value, sendRemote)),
     playerTurnEnd: (playerID) => dispatch(playerTurnEnd(playerID))

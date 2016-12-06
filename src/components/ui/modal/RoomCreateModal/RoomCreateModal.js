@@ -52,6 +52,7 @@ class RoomCreateModal extends Component {
     
     handleCreateRoom = () => {
       let roomID = random(0, 99999);
+      
       this.props.router.push(`/room/${roomID}`);
     }
     

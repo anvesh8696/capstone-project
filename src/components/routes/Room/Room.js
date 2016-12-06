@@ -4,6 +4,7 @@ import { AppBar, Panel } from 'react-toolbox';
 import { themr } from 'react-css-themr';
 import defaultTheme from './Room.scss';
 import CardGame from 'components/game/CardGame';
+import RoomLobbyModal from 'components/ui/modal/RoomLobbyModal';
 
 @themr('Room', defaultTheme)
 class Room extends Component {
@@ -23,19 +24,31 @@ class Room extends Component {
   }
   
   componentDidMount() {
-    this.props.setupRound(findDOMNode(this.refs.game));
+    const { params } = this.props;
+    this.props.setupRound(findDOMNode(this.refs.game), params.roomID);
   }
   
   handleOnDone = () => {
     this.props.router.push('/');
   }
+  
+  renderPage = (status, players) => {
+    if(status === 'WAITING'){
+      return (
+        <RoomLobbyModal open={Boolean(true)} players={players}/>
+      );
+    }
+    return (
+      <CardGame ref="game" {...this.props} onDone={this.handleOnDone}/>
+    );
+  }
 
   render() {
-    const { params } = this.props;
+    const { params, room } = this.props;
     return (
       <Panel>
         <AppBar flat title={`Room: ${params.roomID}`}/>
-        <CardGame ref="game" {...this.props} onDone={this.handleOnDone}/>
+        { this.renderPage(room.status, room.players) }
       </Panel>
     );
   }
