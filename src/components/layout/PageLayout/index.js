@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { Layout, NavDrawer, Navigation } from 'react-toolbox';
+import { Layout, NavDrawer, Navigation } from 'react-toolbox/components/index.js';
 import { themr } from 'react-css-themr';
 import Empty from './Empty';
 import theme from './theme.scss';

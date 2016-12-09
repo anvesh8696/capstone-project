@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
-import { Sidebar } from 'react-toolbox';
-import { List, ListItem, ListSubHeader, ListDivider } from 'react-toolbox/lib/list';
+import { Sidebar } from 'react-toolbox/components/index.js';
+import { List, ListItem, ListSubHeader, ListDivider } from 'react-toolbox/components/list';
 import { themr } from 'react-css-themr';
 import defaultTheme from './Editor.scss';
 

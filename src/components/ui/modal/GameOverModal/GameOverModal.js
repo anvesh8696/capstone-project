@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import { themr } from 'react-css-themr';
 import defaultTheme from './GameOverModal.scss';
-import Dialog from 'react-toolbox/lib/dialog';
-import {Button} from 'react-toolbox/lib/button';
+import Dialog from 'react-toolbox/components/dialog';
+import {Button} from 'react-toolbox/components/button';
 import Cup from '-!babel!svg-react!static/svg/cup.svg?name=Cup';
 
 @themr('GameOverModal', defaultTheme)

@@ -53,7 +53,8 @@ var conf = {
         test: /\.jsx?$/,
         loader: 'babel-loader',
         include: [
-          SRC_PATH
+          SRC_PATH,
+          path.resolve(MODULE_PATH, 'react-toolbox')
         ]
       },
       {

@@ -1,10 +1,10 @@
 import React, { Component, PropTypes } from 'react';
-import { Panel} from 'react-toolbox';
+import { Panel} from 'react-toolbox/components/index.js';
 import { themr } from 'react-css-themr';
 import defaultTheme from './Landing.scss';
-import Dialog from 'react-toolbox/lib/dialog';
-import { Button } from 'react-toolbox/lib/button';
-import { Tab, Tabs } from 'react-toolbox';
+import Dialog from 'react-toolbox/components/dialog';
+import { Button } from 'react-toolbox/components/button';
+import { Tab, Tabs } from 'react-toolbox/components/index.js';
 import RoomCreateModal from 'components/ui/modal/RoomCreateModal';
 import LoginModal from 'components/ui/modal/LoginModal';
 

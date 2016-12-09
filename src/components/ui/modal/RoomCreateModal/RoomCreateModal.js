@@ -1,10 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 import { themr } from 'react-css-themr';
 import defaultTheme from './RoomCreateModal.scss';
-import Dialog from 'react-toolbox/lib/dialog';
-import { Button } from 'react-toolbox/lib/button';
-import { Tab, Tabs } from 'react-toolbox';
-import Input from 'react-toolbox/lib/input';
+import Dialog from 'react-toolbox/components/dialog';
+import { Button } from 'react-toolbox/components/button';
+import { Tab, Tabs } from 'react-toolbox/components/tabs';
+import Input from 'react-toolbox/components/input';
 import AvatarPicker from 'components/ui/button/AvatarPicker';
 import Cup from '-!babel!svg-react!static/svg/cup.svg?name=Cup';
 import { random } from 'lodash';

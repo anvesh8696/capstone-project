@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'; 
 import { themr } from 'react-css-themr';
 import theme from './PlayerButtonBar.scss';
-import { Button } from 'react-toolbox/lib/button';
+import { Button } from 'react-toolbox/components/button';
 
 @themr('PlayerButtonBar', theme)
 export default class PlayerButtonBar extends Component {

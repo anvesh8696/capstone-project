@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout } from 'react-toolbox';
+import { Layout } from 'react-toolbox/components/index.js';
 import { withRouter } from 'react-router';
 
 export default function (Wrapped){

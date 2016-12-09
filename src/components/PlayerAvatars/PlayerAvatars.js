@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from 'react'; 
 import { themr } from 'react-css-themr';
 import theme from './PlayerAvatars.scss';
-import Avatar from 'react-toolbox/lib/avatar';
-import Chip from 'react-toolbox/lib/chip';
+import Avatar from 'react-toolbox/components/avatar';
+import Chip from 'react-toolbox/components/chip';
 import classNames from 'classnames';
 
 @themr('PlayerAvatars', theme)

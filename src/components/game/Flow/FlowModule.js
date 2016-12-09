@@ -6,7 +6,7 @@ import { addCardsToPile, addDrawCardToPile, updateCards, cardsInPile } from 'uti
 import { getPlayableCard } from 'utils/RuleUtil';
 import MsgUtil from 'utils/MsgUtil';
 import Immutable from 'seamless-immutable';
-import { uuid, findUser } from 'utils/UserUtil';
+import { uuid, findUser, createUser } from 'utils/UserUtil';
 
 // ------------------------------------
 // Constants
@@ -127,7 +127,7 @@ export function playerTurnEnd(playerID) {
 export const actions = {
 };
 
-const defaultMe = findUser();
+let defaultMe = findUser('Jack') || createUser('Jack');
 const msgr = new MsgUtil();
 
 //TODO Get ID's from Socket or Local

@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { AppBar, Panel } from 'react-toolbox';
+import { AppBar, Panel } from 'react-toolbox/components/index.js';
 import { themr } from 'react-css-themr';
 import defaultTheme from './Editor.scss';
 import Deck from 'components/Deck/Deck';

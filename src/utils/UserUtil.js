@@ -17,6 +17,14 @@ const persistedStore = function () {
   return d ? JSON.parse(d) : { users:[] };
 };
 
+export const createUser = function (username) {
+  return {
+    id: uuid(),
+    name: username || 'sarahconnor',
+    avatar: 5
+  };
+};
+
 export const findUser = function (username) {
   let persisted = persistedStore();
   let user = find(persisted.users, { name: username});

@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { Layout } from 'react-toolbox';
+import { Layout } from 'react-toolbox/components/index.js';
 import { withRouter } from 'react-router';
 
 export const validateRoomID = (nextState, replace, callback) => {

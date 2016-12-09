@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import { themr } from 'react-css-themr';
 import defaultTheme from './AvatarPicker.scss';
-import {IconButton} from 'react-toolbox/lib/button';
-import Switch from 'react-toolbox/lib/switch';
+import {IconButton} from 'react-toolbox/components/button';
+import Switch from 'react-toolbox/components/switch';
 import Avatar0 from '-!babel!svg-react!static/svg/avatar0.svg';
 import Avatar1 from '-!babel!svg-react!static/svg/avatar1.svg';
 import Avatar2 from '-!babel!svg-react!static/svg/avatar2.svg';

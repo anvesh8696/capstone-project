@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
-import { AppBar, Panel } from 'react-toolbox';
+import { AppBar, Panel } from 'react-toolbox/components/index.js';
 import { themr } from 'react-css-themr';
 import defaultTheme from './Room.scss';
 import CardGame from 'components/game/CardGame';

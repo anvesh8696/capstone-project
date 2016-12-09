@@ -1,9 +1,9 @@
 import React, { Component, PropTypes } from 'react';
 import { themr } from 'react-css-themr';
 import defaultTheme from './LoginModal.scss';
-import Dialog from 'react-toolbox/lib/dialog';
-import {Button} from 'react-toolbox/lib/button';
-import Input from 'react-toolbox/lib/input';
+import Dialog from 'react-toolbox/components/dialog';
+import {Button} from 'react-toolbox/components/button';
+import Input from 'react-toolbox/components/input';
 import AvatarPicker from 'components/ui/button/AvatarPicker';
 
 @themr('LoginModal', defaultTheme)
