@@ -4,6 +4,7 @@
 
 .buttons {
   text-align: right;
+  padding-top: 10px;
 }
 
 .code {
@@ -34,4 +35,28 @@
 
 .tabs, .tab {
   flex: 1;
+}
+
+
+.modeContainer {
+  display: flex;
+  flex-wrap: wrap;
+  padding-top: 10px;
+}
+
+.mode {
+  flex: 1;
+  text-align: center;
+  padding: 5px;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.modeSelected {
+  border-color: #2196f3;
+  border-radius: 10px;
+}
+
+.notouch {
+  pointer-events: none;
 }

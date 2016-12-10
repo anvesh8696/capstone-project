@@ -5,6 +5,7 @@ import Dialog from 'react-toolbox/components/dialog';
 import {Button} from 'react-toolbox/components/button';
 import Input from 'react-toolbox/components/input';
 import AvatarPicker from 'components/ui/button/AvatarPicker';
+import utils from 'react-toolbox/components/utils/utils';
 
 @themr('LoginModal', defaultTheme)
 class LoginModal extends Component {
@@ -53,11 +54,12 @@ class LoginModal extends Component {
     render() {
       const { theme, open, onDone } = this.props;
       const { name, avatar } = this.state;
+      const ariakey = `avatarpicker_${utils.ruuid()}`;
       return (
         <Dialog active={open} theme={theme}>
           <div className={theme.dialogContent}>
-            <h3>Who are you?</h3>
-            <AvatarPicker botToggle={false} value={avatar} onChange={this.handleAvatarChange}/>
+            <h3 id={ariakey}>Who are you?</h3>
+            <AvatarPicker ariakey={ariakey} botToggle={false} value={avatar} onChange={this.handleAvatarChange}/>
             <Input
               type="text"
               label="Your UserName"

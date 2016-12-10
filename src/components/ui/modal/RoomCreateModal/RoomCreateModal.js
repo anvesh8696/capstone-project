@@ -5,9 +5,11 @@ import Dialog from 'react-toolbox/components/dialog';
 import { Button } from 'react-toolbox/components/button';
 import { Tab, Tabs } from 'react-toolbox/components/tabs';
 import Input from 'react-toolbox/components/input';
-import AvatarPicker from 'components/ui/button/AvatarPicker';
-import Cup from '-!babel!svg-react!static/svg/cup.svg?name=Cup';
+import FreeForAll from '-!babel!svg-react!static/svg/freeforall.svg?name=FreeForAll';
+import Teams from '-!babel!svg-react!static/svg/teams.svg?name=Teams';
 import { random } from 'lodash';
+import utils from 'react-toolbox/components/utils/utils';
+import classNames from 'classnames';
 
 @themr('RoomCreateModal', defaultTheme)
 class RoomCreateModal extends Component {
@@ -17,18 +19,14 @@ class RoomCreateModal extends Component {
       open: PropTypes.bool.isRequired,
       router: PropTypes.shape({
         push: PropTypes.func.isRequired
-      }).isRequired,
-      players: PropTypes.array.isRequired
+      }).isRequired
     }
     
     state = {
       code: '',
       codeError: '',
       index: 0,
-      player0: false,
-      player1: true,
-      player2: true,
-      player3: true,
+      modeIndex: 0
     }
     
     handleChange = (name, value) => {
@@ -69,39 +67,56 @@ class RoomCreateModal extends Component {
       this.setState({...this.state, [field]: value});
     };
     
-    handleAvatarChange = (index, type, value) => {
-      
+    handleModeClick = (index) => {
+      this.setState({...this.state, modeIndex: index});
     }
     
-    renderPlayers = (players) => {
-      return players.map((value, index) => this.renderAvatar(index, value.avatar, index > 0));
-    }
-    
-    renderAvatar(index, avatar, botToggle = true){
+    renderM = (ModeSVG, mode, index, selectedIndex, ariakey) => {
+      const { theme } = this.props;
+      const aria = {
+        'role': 'radio',
+        'tabIndex': index === selectedIndex ? 0 : -1,
+        'aria-describedby': `${ariakey}_desc_${index}`
+      };
+      const modeClasses = classNames(
+        theme.mode,
+        index === selectedIndex ? theme.modeSelected : ''
+      );
       return (
-        <AvatarPicker
-          key={`avatar_${index}`}
-          onChange={(type, value) => this.handleAvatarChange(index, type, value)}
-          value={avatar}
-          botToggle={botToggle}
-          picker={botToggle}
-        />
+        <div className={modeClasses} {...aria} onClick={() => this.handleModeClick(index)}>
+          <ModeSVG className={theme.notouch} width={200} height={200} role="presentation" aria-hidden="true"/>
+          <div id={aria['aria-describedby']}>{mode}</div>
+        </div>
+      );
+    }
+    
+    renderModes = (ariakey) => {
+      const { theme } = this.props;
+      const { modeIndex } = this.state;
+      const aria = {
+        'role': 'radiogroup',
+        'aria-labelledby': ariakey
+      };
+      return (
+        <div className={theme.modeContainer} {...aria}>
+          {this.renderM(Teams, 'Teams', 0, modeIndex, ariakey)}
+          {this.renderM(FreeForAll, 'Free For All', 1, modeIndex, ariakey)}
+        </div>
       );
     }
   
     render() {
-      const { theme, open, players } = this.props;
+      const { theme, open } = this.props;
+      const ariakey = `mode_${utils.ruuid()}`;
       return (
         <Dialog active={open} theme={theme}>
           <Tabs index={this.state.index} theme={theme} onChange={this.handleTabChange}>
             <Tab label="Create Room" theme={theme} >
-              <small>Choose opponents :</small>
-              <div className={theme.avatars}>
-                {this.renderPlayers(players)}
-              </div>
-              <div className={theme.buttons}>
+              <small id={ariakey}>How to play :</small>
+              {this.renderModes(ariakey)}
+              <footer className={theme.buttons}>
                 <Button label="Create!" raised primary onClick={this.handleCreateRoom}/>
-              </div>
+              </footer>
             </Tab>
             <Tab label="Join Room" theme={theme}>
               <small>Join a friend's game :</small>
@@ -119,12 +134,12 @@ class RoomCreateModal extends Component {
                   className={theme.code}
                 />
               </div>
-              <div className={theme.buttons}>
+              <footer className={theme.buttons}>
                 <Button label="Join!" raised primary
                   onClick={this.handleJoinRoom}
                   disabled={this.state.codeError != ''}
                 />
-              </div>
+              </footer>
             </Tab>
           </Tabs>
         </Dialog>

@@ -11,8 +11,17 @@ import Avatar4 from '-!babel!svg-react!static/svg/avatar4.svg';
 import Avatar5 from '-!babel!svg-react!static/svg/avatar5.svg';
 import Avatar6 from '-!babel!svg-react!static/svg/avatar6.svg';
 import AvatarBot from '-!babel!svg-react!static/svg/noavatar.svg';
+import classNames from 'classnames';
 
-const Avatarlist = [Avatar0, Avatar1, Avatar2, Avatar3, Avatar4, Avatar5, Avatar6];
+const Avatarlist = [
+  {desc:'Male Black Shirt', svg: Avatar0},
+  {desc:'Girl White Shirt', svg: Avatar1},
+  {desc:'Male Orange Shirt', svg: Avatar2},
+  {desc:'Girl Purple Shirt', svg: Avatar3},
+  {desc:'Male Blue Shirt', svg: Avatar4},
+  {desc:'Girl Blue Shirt', svg: Avatar5},
+  {desc:'Male Santa', svg: Avatar6}
+];
 
 @themr('AvatarPicker', defaultTheme)
 class AvatarPicker extends Component {
@@ -23,7 +32,8 @@ class AvatarPicker extends Component {
       botToggle: PropTypes.bool.isRequired,
       isBot: PropTypes.bool.isRequired,
       value: PropTypes.number.isRequired,
-      onChange: PropTypes.func.isRequired
+      onChange: PropTypes.func.isRequired,
+      ariakey: PropTypes.string.isRequired
     }
     
     static defaultProps = {
@@ -33,11 +43,18 @@ class AvatarPicker extends Component {
       value: 0
     }
     
-    renderAvatar(theme, avatarIndex, picker, botToggle, isBot){
+    renderAvatar(theme, avatarIndex, picker, botToggle, isBot, ariakey){
       let AvatarSvg = !isBot || !botToggle ? Avatarlist[avatarIndex] : AvatarBot;
+      let selectedIndex = 0;
+      const aria = {
+        'role': 'radiogroup',
+        'aria-labelledby': `${ariakey}`,
+        'aria-checked': avatarIndex === selectedIndex,
+        'tabIndex': avatarIndex === selectedIndex ? 0 : -1
+      };
       if(picker){
         return (
-          <IconButton primary theme={theme} onClick={this.handleAvatarClick}>
+          <IconButton primary theme={theme} onClick={this.handleAvatarClick} {...aria}>
             <AvatarSvg width={100} height={100}/>
           </IconButton>
         );
@@ -70,12 +87,40 @@ class AvatarPicker extends Component {
         //this.setState({...this.state, value: value});
       }
     }
+    
+    renderA = (avatar, index, length, selectedIndex, ariakey) => {
+      const AvatarSvg = avatar.svg;//!isBot || !botToggle ? Avatarlist[avatarIndex] : AvatarBot;
+      const { theme } = this.props;
+      const aria = {
+        'role': 'radio',
+        'tabIndex': index === selectedIndex ? 0 : -1,
+        'aria-describedby': `${ariakey}_desc_${index}`
+      };
+      const nextIndex = (selectedIndex + 1) % (Avatarlist.length);
+      const avatarClasses = classNames(
+        theme.avatar,
+        index === selectedIndex ? theme.notouch : index === nextIndex  ? theme.next : theme.hidden
+      );
+      return (
+        <div {...aria} className={avatarClasses}>
+          <AvatarSvg width={100} height={100} role="presentation" aria-hidden="true"/>
+          <span className={theme.avatarDesc} id={aria['aria-describedby']}>{avatar.desc}</span>
+        </div>
+      );
+    }
   
     render() {
-      const { theme, botToggle, isBot, value, picker } = this.props;
+      const { theme, botToggle, isBot, value, picker, ariakey } = this.props;
+      
+      const aria = {
+        'role': 'radiogroup',
+        'aria-labelledby': ariakey
+      };
       return (
-        <div className={theme.avatar}>
-          {this.renderAvatar(theme, value, picker, botToggle, isBot)}
+        <div className={theme.avatarFlex} {...aria}>
+          <div className={theme.avatarContainer} onClick={this.handleAvatarClick}>
+            {Avatarlist.map((a, i) => this.renderA(a, i, Avatarlist.length, value, ariakey))}
+          </div>
           {this.renderBotToggle(botToggle)}
         </div>
       );
