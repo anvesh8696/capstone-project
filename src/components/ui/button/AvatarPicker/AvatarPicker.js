@@ -43,25 +43,6 @@ class AvatarPicker extends Component {
       value: 0
     }
     
-    renderAvatar(theme, avatarIndex, picker, botToggle, isBot, ariakey){
-      let AvatarSvg = !isBot || !botToggle ? Avatarlist[avatarIndex] : AvatarBot;
-      let selectedIndex = 0;
-      const aria = {
-        'role': 'radiogroup',
-        'aria-labelledby': `${ariakey}`,
-        'aria-checked': avatarIndex === selectedIndex,
-        'tabIndex': avatarIndex === selectedIndex ? 0 : -1
-      };
-      if(picker){
-        return (
-          <IconButton primary theme={theme} onClick={this.handleAvatarClick} {...aria}>
-            <AvatarSvg width={100} height={100}/>
-          </IconButton>
-        );
-      }
-      return <AvatarSvg width={100} height={100}/>;
-    }
-    
     renderBotToggle(shouldRender, isBot){
       if(shouldRender){
         return (
@@ -76,33 +57,42 @@ class AvatarPicker extends Component {
     
     handleBotChange = () => {
       let value = this.props.isBot;
-      //this.setState({...this.state, isBot: !value});
       this.props.onChange('isBot', !value);
     }
     
+    /**
+     * Let parent know the avatar changed
+     */
     handleAvatarClick = () => {
       if(!this.props.isBot || !this.props.botToggle){
-        let value = (this.props.value + 1) % (Avatarlist.length);
-        this.props.onChange('value', value);
-        //this.setState({...this.state, value: value});
+        let next = (this.props.value + 1) % (Avatarlist.length);
+        this.props.onChange('value', next);
+        
+        // focus after short delay for DOM update
+        setTimeout(() => {
+          this.refs.avatar.focus();
+        }, 300);
       }
     }
     
     renderA = (avatar, index, length, selectedIndex, ariakey) => {
-      const AvatarSvg = avatar.svg;//!isBot || !botToggle ? Avatarlist[avatarIndex] : AvatarBot;
+      const AvatarSvg = avatar.svg;
       const { theme } = this.props;
       const aria = {
         'role': 'radio',
         'tabIndex': index === selectedIndex ? 0 : -1,
-        'aria-describedby': `${ariakey}_desc_${index}`
+        'aria-describedby': `${ariakey}_desc_${index}`,
+        'key': `${ariakey}_a_${index}`,
+        'aria-checked': (index === selectedIndex).toString()
       };
-      const nextIndex = (selectedIndex + 1) % (Avatarlist.length);
-      const avatarClasses = classNames(
-        theme.avatar,
-        index === selectedIndex ? theme.notouch : index === nextIndex  ? theme.next : theme.hidden
-      );
+      // hide overlapping radio buttons
+      if(index != selectedIndex){
+        return (
+          <div {...aria} className={theme.hidden}></div>
+        );
+      }
       return (
-        <div {...aria} className={avatarClasses}>
+        <div ref="avatar" {...aria} className={theme.avatar}>
           <AvatarSvg width={100} height={100} role="presentation" aria-hidden="true"/>
           <span className={theme.avatarDesc} id={aria['aria-describedby']}>{avatar.desc}</span>
         </div>
@@ -111,7 +101,6 @@ class AvatarPicker extends Component {
   
     render() {
       const { theme, botToggle, isBot, value, picker, ariakey } = this.props;
-      
       const aria = {
         'role': 'radiogroup',
         'aria-labelledby': ariakey

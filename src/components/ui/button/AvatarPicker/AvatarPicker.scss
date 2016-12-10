@@ -36,7 +36,11 @@
   color: transparent;
   position: absolute;
   bottom: 0;
+  left: 50%;
   pointer-events: none;
+  user-select: none;
+  transform: translateX(-50%);
+  z-index: -1;
 }
 
 .hidden {
