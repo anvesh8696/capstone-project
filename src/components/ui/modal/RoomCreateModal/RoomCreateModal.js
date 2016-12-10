@@ -10,6 +10,7 @@ import Teams from '-!babel!svg-react!static/svg/teams.svg?name=Teams';
 import { random } from 'lodash';
 import utils from 'react-toolbox/components/utils/utils';
 import classNames from 'classnames';
+import ReactDOM from "react-dom";
 
 @themr('RoomCreateModal', defaultTheme)
 class RoomCreateModal extends Component {
@@ -27,6 +28,18 @@ class RoomCreateModal extends Component {
       codeError: '',
       index: 0,
       modeIndex: 0
+    }
+    
+    /**
+     * Set focus on createTab when Modal opens
+     *
+     */
+    componentDidUpdate(prevProps, prevState){
+      if(this.props.open != prevProps.open && this.props.open){
+        setTimeout(() => {
+          ReactDOM.findDOMNode(this.refs.createTab).focus();
+        }, 250);
+      }
     }
     
     handleChange = (name, value) => {
@@ -111,7 +124,7 @@ class RoomCreateModal extends Component {
       return (
         <Dialog active={open} theme={theme}>
           <Tabs index={this.state.index} theme={theme} onChange={this.handleTabChange}>
-            <Tab label="Create Room" theme={theme} >
+            <Tab ref="createTab" label="Create Room" theme={theme} >
               <small id={ariakey}>How to play :</small>
               {this.renderModes(ariakey)}
               <footer className={theme.buttons}>
