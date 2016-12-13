@@ -15,9 +15,12 @@ class Room extends Component {
     game: PropTypes.object.isRequired,
     room: PropTypes.object.isRequired,
     buttonAction: PropTypes.func.isRequired,
-    setupRound: PropTypes.func.isRequired,
+    setupRoom: PropTypes.func.isRequired,
     updateGame: PropTypes.func.isRequired,
     playerTurnEnd: PropTypes.func.isRequired,
+    kickPlayer: PropTypes.func.isRequired,
+    addBot: PropTypes.func.isRequired,
+    setupRound: PropTypes.func.isRequired,
     router: PropTypes.shape({
       push: PropTypes.func.isRequired
     }).isRequired
@@ -25,7 +28,7 @@ class Room extends Component {
   
   componentDidMount() {
     const { params } = this.props;
-    this.props.setupRound(findDOMNode(this.refs.game), params.roomID);
+    this.props.setupRoom(params.roomID);
   }
   
   handleOnDone = () => {
@@ -33,9 +36,15 @@ class Room extends Component {
   }
   
   renderPage = (status, players) => {
+    const { kickPlayer, addBot, setupRound } = this.props;
     if(status === 'WAITING'){
       return (
-        <RoomLobbyModal open={Boolean(true)} players={players}/>
+        <RoomLobbyModal
+          players={players}
+          kickPlayer={kickPlayer}
+          addBot={addBot}
+          setupRound={setupRound}
+        />
       );
     }
     return (

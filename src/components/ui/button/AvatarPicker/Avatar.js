@@ -7,7 +7,7 @@ import Avatar3 from '-!babel!svg-react!static/svg/avatar3.svg';
 import Avatar4 from '-!babel!svg-react!static/svg/avatar4.svg';
 import Avatar5 from '-!babel!svg-react!static/svg/avatar5.svg';
 import Avatar6 from '-!babel!svg-react!static/svg/avatar6.svg';
-import AvatarBot from '-!babel!svg-react!static/svg/noavatar.svg';
+import NoAvatar from '-!babel!svg-react!static/svg/noavatar.svg';
 
 export const Avatarlist = [
   {desc:'Male Black Shirt', svg: Avatar0},
@@ -26,9 +26,14 @@ export default class Avatar extends Component {
     height: PropTypes.number.isRequired
   }
   
+  static defaultProps = {
+    width: 100,
+    height: 100
+  }
+  
   render() {
     const {index, width, height} = this.props;
-    const A = Avatarlist[index].svg;
+    const A = index === 7 ? NoAvatar : Avatarlist[index].svg;
     return (
       <A width={width} height={height} role="presentation" aria-hidden="true"/>
     );

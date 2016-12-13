@@ -1,3 +1,19 @@
+.page {
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  background-color: #f0f8ff;
+  overflow-y: scroll;
+}
+
+.dialog {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 5px;
+  background-color: white;
+}
+
 .body {
   flex: 1;
   display: flex;
@@ -10,10 +26,21 @@
   flex-direction: row;
   justify-content: flex-start;
   flex-wrap: wrap;
-  // padding: 1em 0;
+  padding: 10px;
   text-align: center;
 }
 
 .buttons {
   text-align: right;
+}
+
+.avatarContainer {
+  margin: 0 auto;
+  position: relative;
+  width: 100px;
+}
+
+.remove {
+  position: absolute;
+  right: 0;
 }

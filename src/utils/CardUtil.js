@@ -23,7 +23,7 @@ export function generateCards(deckID){
   return Immutable(shuf(c));
 }
 
-export function generatePiles(pileDefs, cards, deal, teams, players, playerID, node) {
+export function generatePiles(pileDefs, cards, deal, teams, players, playerID) {
   //let { cards, deal, players } = this.state;
   
   //1. Seperate Cards into chunks (player piles, draw pile)

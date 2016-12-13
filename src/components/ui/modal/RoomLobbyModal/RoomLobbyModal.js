@@ -1,70 +1,61 @@
 import React, { Component, PropTypes } from 'react';
 import { themr } from 'react-css-themr';
 import defaultTheme from './RoomLobbyModal.scss';
-import Dialog from 'react-toolbox/components/dialog';
 import { Button } from 'react-toolbox/components/button';
-import AvatarPicker from 'components/ui/button/AvatarPicker';
-import { random } from 'lodash';
+import Avatar from 'components/ui/button/AvatarPicker/Avatar';
+import { find } from 'lodash';
 
 @themr('RoomLobbyModal', defaultTheme)
 class RoomLobbyModal extends Component {
   
     static propTypes = {
       theme: PropTypes.object.isRequired,
-      open: PropTypes.bool.isRequired,
-      players: PropTypes.array.isRequired
-    }
-    
-    state = {
-      code: '',
-      codeError: '',
-      index: 0,
-      player0: false,
-      player1: true,
-      player2: true,
-      player3: true,
-    }
-    
-    handlePlayerChange = (field, value) => {
-      this.setState({...this.state, [field]: value});
-    };
-    
-    handleAvatarChange = (index, type, value) => {
-      
-    }
-    
-    handleStart = () => {
-      
+      players: PropTypes.array.isRequired,
+      kickPlayer: PropTypes.func.isRequired,
+      addBot: PropTypes.func.isRequired,
+      setupRound: PropTypes.func.isRequired
     }
     
     renderPlayers = (players) => {
-      return players.map((value, index) => this.renderAvatar(index, value.avatar, index > 0));
+      return players.map((value, index) => this.renderAvatar(index, value.avatar, value.name, value.bot === true));
     }
     
-    renderAvatar(index, avatar, botToggle = true){
+    renderAvatar(index, avatar, name, bot = true){
+      const { theme, kickPlayer } = this.props;
+      if(bot){
+        return (
+          <div className={theme.avatarContainer} key={`avatar_${index}`}>
+            <Avatar index={avatar}/>
+            <Button icon="close" floating accent mini
+              className={theme.remove} onClick={()=>kickPlayer(index, true)}/>
+            <div>{`Ai: ${name}`}</div>
+          </div>
+        );
+      }
       return (
-        <AvatarPicker
-          key={`avatar_${index}`}
-          onChange={(type, value) => this.handleAvatarChange(index, type, value)}
-          value={avatar}
-          botToggle={botToggle}
-          picker={botToggle}
-        />
+        <div className={theme.avatarContainer} key={`avatar_${index}`}>
+          <Avatar index={avatar}/>
+          <div>{name}</div>
+        </div>
       );
     }
   
     render() {
-      const { theme, open, players } = this.props;
+      const { theme, addBot, setupRound, players } = this.props;
+      const ready = find(players, {name: 'Empty Slot'}) != undefined;
       return (
-        <Dialog active={open} theme={theme}>
-          <small>Waiting for players :</small>
-          <div className={theme.avatars}>
-            {this.renderPlayers(players)}
+        <div theme={theme} className={theme.page}>
+          <div className={theme.dialog}>
+            <small>Waiting for players :</small>
+            <div className={theme.avatars}>
+              {this.renderPlayers(players)}
+            </div>
+            <div className={theme.buttons}>
+              <Button label="Add Bot" raised primary disabled={!ready} onClick={addBot}/>
+              <Button label="Start!" raised primary disabled={ready} onClick={setupRound}/>
+            </div>
           </div>
-          <div className={theme.buttons}>
-            <Button label="Start!" raised primary onClick={this.handleStart}/>
-          </div>
-        </Dialog>
+        </div>
       );
     }
 }

@@ -23,7 +23,7 @@ export default class PlayerAvatars extends Component {
       playerTurnIndex == (index%totalPlayers) ? theme.selected : ''
     );
     const aria = {
-      'tabindex':'-1',
+      'tabIndex':'-1',
       'role':'radio'
     };
     return (

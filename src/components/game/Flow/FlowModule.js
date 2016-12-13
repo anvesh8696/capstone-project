@@ -6,7 +6,7 @@ import { addCardsToPile, addDrawCardToPile, updateCards, cardsInPile } from 'uti
 import { getPlayableCard } from 'utils/RuleUtil';
 import MsgUtil from 'utils/MsgUtil';
 import Immutable from 'seamless-immutable';
-import { uuid, findUser, createUser } from 'utils/UserUtil';
+import { uuid, findMe, setMe, createUser, setUser, createBot } from 'utils/UserUtil';
 
 // ------------------------------------
 // Constants
@@ -16,9 +16,12 @@ const FLOW_STATE = 'flow';
 // LOCAL
 export const CREATE_ROOM = 'CREATE_ROOM';
 export const JOIN_ROOM = 'JOIN_ROOM';
+export const SETUP_ROOM = 'SETUP_ROOM';
 export const SETUP_ROUND = 'SETUP_ROUND';
 export const REPLENISH_DRAW_PILE = 'REPLENISH_DRAW_PILE';
 export const USER_LOGIN = 'USER_LOGIN';
+export const KICK_PLAYER = 'KICK_PLAYER';
+export const ADD_BOT = 'ADD_BOT';
 
 // REMOTE
 export const ROOM_CHECK_READY = 'ROOM_CHECK_READY';
@@ -36,41 +39,68 @@ export const END_GAME = 'END_GAME';
 // ------------------------------------
 export const createRoom = createAction(CREATE_ROOM);
 export const joinRoom = createAction(JOIN_ROOM);
+export const setupRoomSuccess = createAction(`${SETUP_ROOM}_SUCCESS`);
+export const setupRoomFail = createAction(`${SETUP_ROOM}_FAIL`);
 export const setupRoundSuccess = createAction(`${SETUP_ROUND}_SUCCESS`);
 export const updateGameSuccess = createAction(`${UPDATE_GAME}_SUCCESS`);
 export const userLogin = createAction(USER_LOGIN);
 export const playerTurnEndSuccess = createAction(`${PLAYER_TURN_END}_SUCCESS`);
 export const endGame = createAction(END_GAME);
 export const replenishDrawPile = createAction(REPLENISH_DRAW_PILE);
+export const kickPlayer = createAction(KICK_PLAYER);
+export const addBot = createAction(ADD_BOT);
 
 // ------------------------------------
 // ASYNC Actions
 // ------------------------------------
-export function setupRound(node, roomID) {
+export function setupRoom(roomID) {
   return function (dispatch, getState) {
     const { room, me } = getState()[FLOW_STATE];
-    const { deckID, deal, teamMode } = room;
     
+    let nRoom = room.merge({
+      isGameOver: false,
+      status: 'WAITING',
+      winner: ''
+    });
     
     // join the room
     if(msgr.room != roomID){
       msgr.login(me.id);
-      msgr.join(roomID, me);
+      msgr.join(roomID, me)
+        .then(() => {
+          console.log(me, 'joined the room');
+          dispatch(setupRoomSuccess({room: nRoom}));
+        })
+        .catch(() => {
+          console.log('something went wrong');
+          dispatch(setupRoomFail());
+        });
+    } else {
+      dispatch(setupRoomSuccess({room: nRoom}));
     }
+  };
+}
+export function setupRound() {
+  return function (dispatch, getState) {
+    const { room, me } = getState()[FLOW_STATE];
+    const { deckID, deal, teamMode } = room;
     
     let players = room.players;
     let nRoom = room.merge({
       playerTurn: me.id,
       //players: players,
       isGameOver: false,
+      status: 'STARTED',
       winner: ''
     });
-    let nGame = generateGame(deckID, deal, teamMode, players, me.id, node);
+    let nGame = generateGame(deckID, deal, teamMode, players, me.id);
     
     dispatch(setupRoundSuccess({room: nRoom, game: nGame, me:me}));
     
     // Update the layout
-    window.dispatchEvent(new Event('resize'));
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    });
   };
 }
 
@@ -127,17 +157,21 @@ export function playerTurnEnd(playerID) {
 export const actions = {
 };
 
-let defaultMe = findUser('Jack') || createUser('Jack');
+let defaultMe = findMe();
+if(!defaultMe){
+  defaultMe = setMe(setUser(createUser('Jack')));
+  console.log('defaultMe', defaultMe);
+}
+
 const msgr = new MsgUtil();
 
 //TODO Get ID's from Socket or Local
-const guys = [0,2,4,6];
-const girls = [1,3,5];
+
 const defaultPlayers = [
   defaultMe,
-  {name:'Fill', avatar:guys[random(0, guys.length-1)], id:uuid(), bot:true},
-  {name:'Ashley', avatar:girls[random(0, girls.length-1)], id:uuid(), bot:true},
-  {name:'Brian', avatar:guys[random(0, guys.length-1)], id:uuid(), bot:true}
+  createBot(),
+  createBot(),
+  createBot()
 ];
   
 // ------------------------------------
@@ -239,12 +273,31 @@ const handleReplenishDrawPile = function (state) {
   return state.setIn(['game','cards'], cards);
 };
 
-const handleUserLogin = function (state, name, avatar){
+const handleUserLogin = function (state, name, avatar) {
   let index = 0;
+  // update storage
+  setMe(setUser({...state.me, name:name, avatar:avatar}));
+  // update state
   return state.setIn(['me','name'], name)
     .setIn(['me','avatar'], avatar)
     .setIn(['room','players',index,'name'], name)
     .setIn(['room','players',index,'avatar'], avatar);
+};
+
+const handleKickPlayer = function (state, index, bot) {
+  return state
+    .setIn(['room','players',index,'name'], 'Empty Slot')
+    .setIn(['room','players',index,'avatar'], 7)
+    .setIn(['room','players',index,'bot'], false);
+};
+
+const handleAddBot = function (state) {
+  let empty = findIndex(state.room.players, {name: 'Empty Slot'});
+  if(empty != -1){
+    return state
+      .setIn(['room','players',empty], createBot(state.room.players));
+  }
+  return state;
 };
 
 // ------------------------------------
@@ -253,12 +306,15 @@ const handleUserLogin = function (state, name, avatar){
 export const flowReducer = handleActions({
   [`${CREATE_ROOM}_SUCCESS`]: (state, action) => ({...state, room: action.payload}),
   [JOIN_ROOM]: (state, action) => ({...state, room: action.payload}),
+  [`${SETUP_ROOM}_SUCCESS`]: (state, action) => (state.merge(action.payload, {deep: true})),
   [`${SETUP_ROUND}_SUCCESS`]: (state, action) => (state.merge(action.payload, {deep: true})),
   [`${UPDATE_GAME}_SUCCESS`]: (state, action) => handleUpdateGameSuccess(state, action),
   [`${PLAYER_TURN_END}_SUCCESS`]: (state, action) => state.setIn(['room','playerTurn'], action.payload),
   [END_GAME]: (state, action) => state.setIn(['room','isGameOver'], true).setIn(['room','winner'], action.payload),
   [REPLENISH_DRAW_PILE]: (state, action) => handleReplenishDrawPile(state),
-  [USER_LOGIN]: (state, action) => handleUserLogin(state, action.payload.name, action.payload.avatar)
+  [USER_LOGIN]: (state, action) => handleUserLogin(state, action.payload.name, action.payload.avatar),
+  [KICK_PLAYER]: (state, action) => handleKickPlayer(state, action.payload.index, action.payload.bot),
+  [ADD_BOT]: (state, action) => handleAddBot(state)
 }, initialState);
 
 export default flowReducer;

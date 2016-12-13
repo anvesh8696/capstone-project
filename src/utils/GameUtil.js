@@ -3,11 +3,11 @@ import { findIndex, each, filter } from 'lodash';
 import { generateCards, generatePiles, generatePileDefs } from 'utils/CardUtil';
 import { cardIndex } from 'utils/PileUtil';
 
-export function generateGame(deckID, handSize, teamMode, players, playerID, node) {
+export function generateGame(deckID, handSize, teamMode, players, playerID) {
   let teams = randomTeams(teamMode, players);
   let cards = generateCards(deckID);
   let defs = generatePileDefs(deckID);
-  let game = generatePiles(defs, cards, handSize, teams, players, playerID, node);
+  let game = generatePiles(defs, cards, handSize, teams, players, playerID);
   //cards = deal(game.cards, players, node, handSize = 7);
   
   return Immutable({

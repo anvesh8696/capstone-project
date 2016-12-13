@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import Room from './Room';
 import { playerAction } from './RoomModule';
-import { setupRound, updateGame, mergeGame, playerTurnEnd } from 'components/game/Flow/FlowModule';
+import { setupRoom, setupRound, updateGame, mergeGame, playerTurnEnd, kickPlayer, addBot } from 'components/game/Flow/FlowModule';
 
 const mapStateToProps = (state) => {
   return {
@@ -14,10 +14,13 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     buttonAction: (action) => dispatch(playerAction(action)),
-    setupRound: (node, roomID) => dispatch(setupRound(node, roomID)),
+    setupRoom: (roomID) => dispatch(setupRoom(roomID)),
     updateGame: (key, value, sendRemote) => dispatch(updateGame(key, value, sendRemote)),
     mergeGame: (value, sendRemote) => dispatch(mergeGame(value, sendRemote)),
-    playerTurnEnd: (playerID) => dispatch(playerTurnEnd(playerID))
+    playerTurnEnd: (playerID) => dispatch(playerTurnEnd(playerID)),
+    kickPlayer: (index, bot) => dispatch(kickPlayer({index, bot})),
+    addBot: () => dispatch(addBot()),
+    setupRound: () => dispatch(setupRound())
   };
 };
 

@@ -25,9 +25,22 @@ export const createUser = function (username) {
   };
 };
 
+export const setMe = function (userinfo){
+  let persisted = persistedStore();
+  persisted.me = userinfo;
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(persisted));
+  return persisted.me;
+};
+
+export const findMe = function () {
+  let persisted = persistedStore();
+  return persisted.me;
+};
+
 export const findUser = function (username) {
   let persisted = persistedStore();
   let user = find(persisted.users, { name: username});
+  console.log('findUser', persisted, user);
   //username ? find(persisted.users, { name: username}) : persisted.users[0];
   // if(!user){
   //   user = setUser({
@@ -41,7 +54,7 @@ export const findUser = function (username) {
 
 export const setUser = function (userinfo) {
   let persisted = persistedStore();
-  let index = findIndex(persisted.users, { name: userinfo.name});
+  let index = findIndex(persisted.users, { id: userinfo.id});
   if(index == -1){
     persisted.users.push(userinfo);
   } else {
@@ -49,4 +62,37 @@ export const setUser = function (userinfo) {
   }
   localStorage.setItem(LOCAL_KEY, JSON.stringify(persisted));
   return userinfo;
+};
+
+const guys = [0,2,4,6];
+const girls = [1,3,5];
+const guyNames = ['Plant', 'Mercury', 'Hendrix', 'Bono', 'Presley', 'Tyler', 'Jagger', 'Morrison'];
+const girlNames = ['Kat', 'Hanna', 'Grace', 'Joni', 'Nicks', 'Joplin'];
+  
+export const createBot = function (ignore) {
+  let bot = {id:uuid(), bot:true};
+  if(random(0, 1) === 0){
+    return {
+      name: uniqueName(ignore, girlNames),
+      avatar: girls[random(0, girls.length-1)],
+      ...bot
+    };
+  }
+  return {
+    name: uniqueName(ignore, guyNames),
+    avatar: guys[random(0, guys.length-1)],
+    ...bot
+  };
+};
+
+const uniqueName = function (ignore, list) {
+  let name = list[random(0, list.length-1)];
+  let safe = 10;
+  while(findIndex(ignore, { name: name }) != -1){
+    name = list[random(0, list.length-1)];
+    if(safe-- <= 0){
+      break;
+    }
+  }
+  return name;
 };
