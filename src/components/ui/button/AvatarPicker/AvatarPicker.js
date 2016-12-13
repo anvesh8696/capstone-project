@@ -3,25 +3,8 @@ import { themr } from 'react-css-themr';
 import defaultTheme from './AvatarPicker.scss';
 import {IconButton} from 'react-toolbox/components/button';
 import Switch from 'react-toolbox/components/switch';
-import Avatar0 from '-!babel!svg-react!static/svg/avatar0.svg';
-import Avatar1 from '-!babel!svg-react!static/svg/avatar1.svg';
-import Avatar2 from '-!babel!svg-react!static/svg/avatar2.svg';
-import Avatar3 from '-!babel!svg-react!static/svg/avatar3.svg';
-import Avatar4 from '-!babel!svg-react!static/svg/avatar4.svg';
-import Avatar5 from '-!babel!svg-react!static/svg/avatar5.svg';
-import Avatar6 from '-!babel!svg-react!static/svg/avatar6.svg';
-import AvatarBot from '-!babel!svg-react!static/svg/noavatar.svg';
 import classNames from 'classnames';
-
-const Avatarlist = [
-  {desc:'Male Black Shirt', svg: Avatar0},
-  {desc:'Girl White Shirt', svg: Avatar1},
-  {desc:'Male Orange Shirt', svg: Avatar2},
-  {desc:'Girl Purple Shirt', svg: Avatar3},
-  {desc:'Male Blue Shirt', svg: Avatar4},
-  {desc:'Girl Blue Shirt', svg: Avatar5},
-  {desc:'Male Santa', svg: Avatar6}
-];
+import Avatar, { Avatarlist } from './Avatar';
 
 @themr('AvatarPicker', defaultTheme)
 class AvatarPicker extends Component {
@@ -93,7 +76,7 @@ class AvatarPicker extends Component {
       }
       return (
         <div ref="avatar" {...aria} className={theme.avatar}>
-          <AvatarSvg width={100} height={100} role="presentation" aria-hidden="true"/>
+          <Avatar index={index} width={100} height={100} />
           <span className={theme.avatarDesc} id={aria['aria-describedby']}>{avatar.desc}</span>
         </div>
       );

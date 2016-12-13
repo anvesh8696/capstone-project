@@ -84,21 +84,23 @@ class RoomCreateModal extends Component {
       this.setState({...this.state, modeIndex: index});
     }
     
-    renderM = (ModeSVG, mode, index, selectedIndex, ariakey) => {
+    renderM = (ModeSVG, mode, desc, index, selectedIndex, ariakey) => {
       const { theme } = this.props;
       const aria = {
         'role': 'radio',
-        'tabIndex': index === selectedIndex ? 0 : -1,
-        'aria-describedby': `${ariakey}_desc_${index}`
+        'tabIndex': index === selectedIndex ? 0 : -1
       };
       const modeClasses = classNames(
         theme.mode,
         index === selectedIndex ? theme.modeSelected : ''
       );
       return (
-        <div className={modeClasses} {...aria} onClick={() => this.handleModeClick(index)}>
+        <div key={`mode_${index}`} className={modeClasses} {...aria} onClick={() => this.handleModeClick(index)}>
           <ModeSVG className={theme.notouch} width={200} height={200} role="presentation" aria-hidden="true"/>
-          <div id={aria['aria-describedby']}>{mode}</div>
+          <div>
+            {mode}
+            <p>{desc}</p>
+          </div>
         </div>
       );
     }
@@ -110,10 +112,13 @@ class RoomCreateModal extends Component {
         'role': 'radiogroup',
         'aria-labelledby': ariakey
       };
+      const info = [
+        {cls: Teams, title: 'Teams', desc: 'Players are split into teams of two.'},
+        {cls: FreeForAll, title: 'Free For All', desc: 'All players are against one another.'}
+      ];
       return (
         <div className={theme.modeContainer} {...aria}>
-          {this.renderM(Teams, 'Teams', 0, modeIndex, ariakey)}
-          {this.renderM(FreeForAll, 'Free For All', 1, modeIndex, ariakey)}
+          {info.map((d, i) => this.renderM(d.cls, d.title, d.desc, i, modeIndex, ariakey))}
         </div>
       );
     }
