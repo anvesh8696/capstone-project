@@ -2,7 +2,8 @@ import React, { Component, PropTypes } from 'react';
 import { themr } from 'react-css-themr';
 import theme from './DeckCard.scss';
 import classNames from 'classnames';
-import {Motion, spring} from 'react-motion';
+import { Motion, spring } from 'react-motion';
+import utils from 'react-toolbox/components/utils/utils';
 
 export const cardDefaults = {
   suit: 'diamond',
@@ -49,7 +50,8 @@ export default class DeckCard extends Component {
     flipped: PropTypes.bool.isRequired,
     selected: PropTypes.bool.isRequired,
     clickable: PropTypes.bool.isRequired,
-    onClick: PropTypes.func.isRequired
+    onClick: PropTypes.func.isRequired,
+    onKeyDown: PropTypes.func.isRequired
   }
   
   static defaultProps = cardDefaults
@@ -63,7 +65,7 @@ export default class DeckCard extends Component {
   }
   
   render() {
-    let {x, y, scale, angle, angleOffset, flipped, selected, clickable, order} = this.props;
+    let {x, y, scale, angle, angleOffset, flipped, selected, clickable, order, suit, value, pile, onClick, onKeyDown} = this.props;
     let style = {x: spring(x), y: spring(y), angle: spring(angle + angleOffset)};
     const front = classNames(theme.front,
       flipped ? theme.flipped : '',
@@ -75,15 +77,26 @@ export default class DeckCard extends Component {
     const inner = classNames(theme.inner,
       clickable ? theme.clickable : '',
       selected ? theme.selected : '');
+    const ariakey = `card_${utils.ruuid()}`;
+    const aria = pile === 0 ? {
+      'role': 'radio',
+      'aria-label': `${value} of ${suit}s`,
+      'tabIndex': '0'
+    } : flipped === false ? {
+      'aria-label': `${value} of ${suit}s`,
+      'tabIndex': '0'
+    } : {
+      'aria-hidden': true
+    };
     return (
       <Motion style={style}>
         {
           ({x, y, angle}) => (
-            <div className={theme.move} style={this.cardMotion(x, y, scale, angle, order)} onClick={this.props.onClick}>
+            <div className={theme.move} style={this.cardMotion(x, y, scale, angle, order)}>
               <div className={theme.originb}></div>
-              <div className={inner}>
+              <div className={inner} onClick={onClick} onKeyDown={(e)=>{onKeyDown(e)}} {...aria}>
                 <div className={front}>
-                  <p>{this.props.value}</p>
+                  <p aria-hidden="true">{value}</p>
                 </div>
                 <div className={back}></div>
                 <div className={theme.origin}></div>

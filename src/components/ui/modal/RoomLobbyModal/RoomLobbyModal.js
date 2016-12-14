@@ -25,8 +25,8 @@ class RoomLobbyModal extends Component {
       if(bot){
         return (
           <div className={theme.avatarContainer} key={`avatar_${index}`}>
-            <Avatar index={avatar}/>
-            <Button icon="close" floating accent mini
+            <Avatar index={avatar} />
+            <Button icon="close" floating accent mini aria-label={`Remove ${name}`}
               className={theme.remove} onClick={()=>kickPlayer(index, true)}/>
             <div>{`Ai: ${name}`}</div>
           </div>
@@ -44,9 +44,9 @@ class RoomLobbyModal extends Component {
       const { theme, addBot, setupRound, players } = this.props;
       const ready = find(players, {name: 'Empty Slot'}) != undefined;
       return (
-        <div theme={theme} className={theme.page}>
+        <div className={theme.page}>
           <div className={theme.dialog}>
-            <small>Waiting for players :</small>
+            <small>Play with bots or invite friends :</small>
             <div className={theme.avatars}>
               {this.renderPlayers(players)}
             </div>

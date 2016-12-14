@@ -32,12 +32,15 @@
 
 .buttons {
   text-align: right;
+  > button:not(:first-child) {
+    margin-left: 10px;
+  }
 }
 
 .avatarContainer {
   margin: 0 auto;
   position: relative;
-  width: 100px;
+  padding: 10px;
 }
 
 .remove {

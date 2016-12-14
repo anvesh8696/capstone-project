@@ -20,7 +20,8 @@ export default class Deck extends Component {
     piles: PropTypes.object.isRequired,
     pileDefs: PropTypes.array.isRequired,
     onCardClick: PropTypes.func.isRequired,
-    onUpdate: PropTypes.func.isRequired
+    onUpdate: PropTypes.func.isRequired,
+    onKeyDown: PropTypes.func.isRequired
   }
   
   // state = {
@@ -200,15 +201,15 @@ export default class Deck extends Component {
   // }
   
   renderCards(cards, action) {
-    const { onCardClick } = this.props;
+    const { onCardClick, onKeyDown } = this.props;
     return chain(each(cards, (card, key) => {
-      card.set('order', Math.round(card.x - card.y + card.z));
+      card = card.set('order', Math.round(card.x - card.y + card.z));
     }))
     .orderBy('order', 'asc')
     .each((card, key) => {
-      card.set('order', key);
+      card = card.set('order', key);
     })
-    .map(c => <DeckCard {...c} onClick={() => onCardClick(c)}/>)
+    .map(c => <DeckCard {...c} onClick={() => onCardClick(c)} onKeyDown={(e) => onKeyDown(e, c)}/>)
     .value();
   }
   
@@ -216,7 +217,7 @@ export default class Deck extends Component {
     const { cards } = this.props;
     const { action, theme } = this.props;
     return (
-      <div ref="node" className={theme.board}>
+      <div ref="node" className={theme.board} role="radiogroup">
         {
           this.renderCards(cards, action)
         }

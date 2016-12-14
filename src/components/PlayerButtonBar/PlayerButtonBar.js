@@ -9,18 +9,19 @@ export default class PlayerButtonBar extends Component {
   static propTypes = {
     theme: PropTypes.object.isRequired,
     onDraw: PropTypes.func.isRequired,
-    onDone: PropTypes.func.isRequired
+    onDone: PropTypes.func.isRequired,
+    disableDone: PropTypes.bool.isRequired
   }
   
   state = {
   }
   
   render() {
-    const { theme, onDraw, onDone } = this.props;
+    const { theme, onDraw, onDone, disableDone } = this.props;
     return (
       <div className={theme.buttonBar}>
         <Button label="Draw" raised primary theme={theme} onClick={onDraw}/>
-        <Button label="Done" raised primary theme={theme} onClick={onDone}/>
+        <Button label="Done" raised primary theme={theme} disabled={disableDone} onClick={onDone}/>
       </div>
     );
   }

@@ -9,3 +9,8 @@
   transform: translate(-50%, 0);
   z-index: 300;
 }
+
+button[disabled] {
+  background-color: #d0d0d0;
+  color: #a0a0a0;
+}

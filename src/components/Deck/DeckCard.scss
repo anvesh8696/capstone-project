@@ -53,7 +53,7 @@
   bottom: 0;
   user-select: none;
   transform: rotateY(0);
-  cursor: default;
+  pointer-events: none;
 }
 
 .front {
@@ -109,7 +109,16 @@
   z-index: 200;
 }
 
-
+.cardAria {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 200;
+  color: transparent;
+  user-select: none;
+}
 
 .suitclub, .suitspade, .suitdiamond, .suitheart {
   @include suite;

@@ -7,7 +7,7 @@ import Deck from 'components/Deck/Deck';
 import deckTheme from 'components/Deck/Deck.scss';
 import PlayerButtonBar from 'components/PlayerButtonBar';
 import { cardIndex, isCardInPile, updateCards, addCardsToPile, addDrawCardToPile } from 'utils/PileUtil';
-import { each, random, findLastIndex, findLast } from 'lodash';
+import { find } from 'lodash';
 import PlayerAvatars from 'components/PlayerAvatars';
 import { getPlayerIndex, isPlayerTurn } from 'utils/RoomUtil';
 import { updateCard, getDrawPileIndex, getDiscardPileIndex, getLastDiscard, getSelectedCards } from 'utils/GameUtil';
@@ -45,8 +45,36 @@ class CardGame extends Component {
         }
       }
       
+      // unselect prev selected card
+      let lastSelected = find(cards, {selected: true});
+      if(lastSelected){
+        updateCard(cards, {...lastSelected, selected: false}, this.props.updateGame);
+      }
+      
       updateCard(cards, {...card, selected: !card.selected}, this.props.updateGame);
     }
+  }
+  
+  handleDeckKeyDown = (event, card) => {
+    /*
+    onKeyDown: (event) => {
+            const c = event.keyCode;
+            const dir = c === 37 || c === 38 ? -1 : c === 39 || c === 40 ? 1 : 0;
+            const max = headers.length;
+            let nidx = ((idx + dir) % max + max) % max;
+            if (nidx !== idx){
+              const id = event.currentTarget.id;
+              const next = headers[nidx];
+              if (this.navigationNode && this.navigationNode.children[nidx]) {
+                this.navigationNode.children[nidx].focus();
+              }
+              nidx = id.substring(0, id.lastIndexOf('_') + 1) + nidx;
+              this.handleHeaderClick(nidx);
+              next.props.onClick && next.props.onClick(event);
+            }
+          }
+          */
+    console.log(event, card);
   }
   
   handleDeckUpdate = (msg) => {
@@ -98,16 +126,18 @@ class CardGame extends Component {
 
   render() {
     const { theme, game, room, onDone } = this.props;
+    const { cards } = game;
     const { players, winner } = this.props.room;
     const { id } = this.props.me;
     const { playerTurn } = room;
     const playerIndex = getPlayerIndex(players, id);
     const playerTurnIndex = getPlayerIndex(players, playerTurn);
+    const disableDone = find(cards, {selected: true}) === undefined;
     return (
       <div className={theme.page}>
         <GameOverModal open={room.isGameOver} winner={winner} onDone={onDone}/>
         <PlayerAvatars players={players} playerIndex={playerIndex} playerTurnIndex={playerTurnIndex} />
-        <PlayerButtonBar onDraw={this.handleDraw} onDone={this.handleDone}/>
+        <PlayerButtonBar disableDone={disableDone} onDraw={this.handleDraw} onDone={this.handleDone}/>
         <Deck ref="deck"
           action={''}
           {...game}
@@ -115,6 +145,7 @@ class CardGame extends Component {
           totalPlayers={players.length}
           theme={theme}
           onCardClick={this.handleCardClick}
+          onKeyDown={this.handleDeckKeyDown}
           onUpdate={this.handleDeckUpdate}
         />
       </div>
