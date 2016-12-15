@@ -1,7 +1,7 @@
 import { handleActions, createAction } from 'redux-actions';
 import { random, findIndex, findLastIndex } from 'lodash';
 import { isBot, getPlayerIndex, getNextPlayerID, isTeammate, getPlayerName } from 'utils/RoomUtil';
-import { generateGame, getDrawPileIndex, getLastDiscard, getDiscardPileIndex, getPileCards } from 'utils/GameUtil';
+import { generateGame, getDrawPileIndex, getLastDiscard, getDiscardPileIndex, getPileCards, markLastInPile } from 'utils/GameUtil';
 import { addCardsToPile, addDrawCardToPile, updateCards, cardsInPile } from 'utils/PileUtil';
 import { getPlayableCard } from 'utils/RuleUtil';
 import MsgUtil from 'utils/MsgUtil';
@@ -22,6 +22,7 @@ export const REPLENISH_DRAW_PILE = 'REPLENISH_DRAW_PILE';
 export const USER_LOGIN = 'USER_LOGIN';
 export const KICK_PLAYER = 'KICK_PLAYER';
 export const ADD_BOT = 'ADD_BOT';
+export const RECORD_ACTION = 'RECORD_ACTION';
 
 // REMOTE
 export const ROOM_CHECK_READY = 'ROOM_CHECK_READY';
@@ -49,6 +50,7 @@ export const endGame = createAction(END_GAME);
 export const replenishDrawPile = createAction(REPLENISH_DRAW_PILE);
 export const kickPlayer = createAction(KICK_PLAYER);
 export const addBot = createAction(ADD_BOT);
+export const recordActionSuccess = createAction(`${RECORD_ACTION}_SUCCESS`);
 
 // ------------------------------------
 // ASYNC Actions
@@ -148,35 +150,39 @@ export function playerTurnEnd(playerID) {
     
       // bot control
       if(isBot(players, nextPlayerID)){
-        setTimeout(() => think(dispatch, getState, nextPlayerID), 1000 * random(1,2.5));
+        setTimeout(() => think(dispatch, getState, nextPlayerID), 2000 * random(1,2));
       }
     }
   };
 }
 
+export function recordAction(playerID, action){
+  return function (dispatch, getState) {
+    const { players, actions } = getState()[FLOW_STATE].room;
+    const playerName = getPlayerName(players, playerID);
+    
+    dispatch(recordActionSuccess(actions.concat(Immutable([`${playerName} ${action}`]))));
+  };
+}
+
 export const actions = {
 };
-
+  
+// ------------------------------------
+// Initial State
+// ------------------------------------
 let defaultMe = findMe();
 if(!defaultMe){
   defaultMe = setMe(setUser(createUser('Jack')));
-  console.log('defaultMe', defaultMe);
 }
-
 const msgr = new MsgUtil();
-
-//TODO Get ID's from Socket or Local
-
 const defaultPlayers = [
   defaultMe,
   createBot(),
   createBot(),
   createBot()
 ];
-  
-// ------------------------------------
-// Initial State
-// ------------------------------------
+
 const initialState = {
   game: {
     cards: [],
@@ -191,7 +197,8 @@ const initialState = {
     playerTurn: 0,
     isGameOver: false,
     status: 'WAITING',
-    winner: ''
+    winner: '',
+    actions: []
   },
   me: defaultMe
 };
@@ -214,20 +221,35 @@ const think = function (dispatch, getState, playerID) {
   let prevCard = getLastDiscard(cards, pileDefs);
   let playable = null;
   
+  // match the last played card
   if(prevCard){
     playable = getPlayableCard(playerCards, prevCard, null);
-  } else {
-    // random first card
+  }
+  // pick random first card
+  else {
     playable = playerCards[random(0, playerCards.length - 1)];
   }
   
+  // use playable card
   if(playable){
     let discard = getDiscardPileIndex(pileDefs);
     cards = addCardsToPile(cards, [playable], discard, false, true);
-  } else {
+    // mark last card in discard pile
+    cards = markLastInPile(cards, discard);
+    dispatch(recordAction(playerID, `played ${playable.value} of ${playable.suit}s`));
+  }
+  // draw a card
+  else {
+    let draw = getDrawPileIndex(pileDefs);
     let flipped = !isTeammate(playerID, id, teams);
     cards = addDrawCardToPile(cards, piles, pileDefs, playerPile, flipped);
+    // mark last card in draw pile
+    cards = markLastInPile(cards, draw);
+    dispatch(recordAction(playerID, 'drew a card'));
   }
+        
+  // mark last card in player hand
+  cards = markLastInPile(cards, playerID);
   
   cards = updateCards(piles, cards, hostPile, players.length);
   dispatch(updateGame(['game', 'cards'], cards));
@@ -314,7 +336,8 @@ export const flowReducer = handleActions({
   [REPLENISH_DRAW_PILE]: (state, action) => handleReplenishDrawPile(state),
   [USER_LOGIN]: (state, action) => handleUserLogin(state, action.payload.name, action.payload.avatar),
   [KICK_PLAYER]: (state, action) => handleKickPlayer(state, action.payload.index, action.payload.bot),
-  [ADD_BOT]: (state, action) => handleAddBot(state)
+  [ADD_BOT]: (state, action) => handleAddBot(state),
+  [`${RECORD_ACTION}_SUCCESS`]: (state, action) => state.setIn(['room','actions'], action.payload)
 }, initialState);
 
 export default flowReducer;

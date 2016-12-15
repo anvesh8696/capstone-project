@@ -21,7 +21,7 @@ export default function (Wrapped){
     render() {
       return (
         <Layout>
-          <Wrapped {...this.props}/>
+          <Wrapped {...this.props} role="main"/>
         </Layout>
       );
     }

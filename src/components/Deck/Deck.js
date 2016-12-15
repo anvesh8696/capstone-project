@@ -5,7 +5,8 @@ import theme from './Deck.scss';
 import DeckCard from './DeckCard';
 import {resetPositions, randomPositions, suitRowPositions,
   centroidPositions, flip, sort, shuffle, boundry, merge} from 'utils/CardUtil';
-import { updatePiles, updateCards } from 'utils/PileUtil';
+import { updatePiles, updateCards, cardIndexInPile } from 'utils/PileUtil';
+import { getPileCards } from 'utils/GameUtil';
 import { CARD_WIDTH, CARD_HEIGHT } from 'utils/CardUtil';
 
 @themr('Deck', theme)

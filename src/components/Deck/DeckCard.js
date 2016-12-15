@@ -27,6 +27,7 @@ export const cardDealDefaults = {
   y: 0,
   z: 0,
   pile: 0,
+  lastInPile: false,
   angleOffset: 0,
   selected: false,
   clickable: false
@@ -45,6 +46,7 @@ export default class DeckCard extends Component {
     scale: PropTypes.number.isRequired,
     angle: PropTypes.number.isRequired,
     angleOffset: PropTypes.number.isRequired,
+    lastInPile: PropTypes.bool.isRequired,
     pile: PropTypes.number.isRequired,
     order: PropTypes.number.isRequired,
     flipped: PropTypes.bool.isRequired,
@@ -64,8 +66,41 @@ export default class DeckCard extends Component {
     };
   }
   
+  createAria(value, suit, pile, flipped, lastInPile) {
+    // player card
+    if(pile === 0){
+      return {
+        'role': 'radio',
+        'aria-label': `${value} of ${suit}s`,
+        'tabIndex': '0'
+      };
+    }
+    // discard card
+    else if(pile === 5){
+      if(lastInPile){
+        return {
+          'aria-label': `last played card is ${value} of ${suit}s`,
+          'tabIndex': 0
+        };
+      }
+    }
+    // team card
+    else if(flipped === false){
+      return {
+        'aria-label': `${value} of ${suit}s`,
+        'tabIndex': 0
+      };
+    }
+    // default is not selectable
+    return {
+      'aria-hidden': true,
+      'tabIndex': -1
+    };
+  }
+  
   render() {
-    let {x, y, scale, angle, angleOffset, flipped, selected, clickable, order, suit, value, pile, onClick, onKeyDown} = this.props;
+    let {x, y, scale, angle, angleOffset, flipped,
+      selected, clickable, order, suit, value, pile, onClick, onKeyDown, lastInPile} = this.props;
     let style = {x: spring(x), y: spring(y), angle: spring(angle + angleOffset)};
     const front = classNames(theme.front,
       flipped ? theme.flipped : '',
@@ -77,17 +112,8 @@ export default class DeckCard extends Component {
     const inner = classNames(theme.inner,
       clickable ? theme.clickable : '',
       selected ? theme.selected : '');
-    const ariakey = `card_${utils.ruuid()}`;
-    const aria = pile === 0 ? {
-      'role': 'radio',
-      'aria-label': `${value} of ${suit}s`,
-      'tabIndex': '0'
-    } : flipped === false ? {
-      'aria-label': `${value} of ${suit}s`,
-      'tabIndex': '0'
-    } : {
-      'aria-hidden': true
-    };
+    const aria = this.createAria(value, suit, pile, flipped, lastInPile);
+    
     return (
       <Motion style={style}>
         {

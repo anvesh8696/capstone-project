@@ -10,7 +10,7 @@ import Teams from '-!babel!svg-react!static/svg/teams.svg?name=Teams';
 import { random } from 'lodash';
 import utils from 'react-toolbox/components/utils/utils';
 import classNames from 'classnames';
-import ReactDOM from "react-dom";
+import ReactDOM from 'react-dom';
 
 @themr('RoomCreateModal', defaultTheme)
 class RoomCreateModal extends Component {

@@ -4,6 +4,7 @@ import defaultTheme from './RoomLobbyModal.scss';
 import { Button } from 'react-toolbox/components/button';
 import Avatar from 'components/ui/button/AvatarPicker/Avatar';
 import { find } from 'lodash';
+import ReactDOM from 'react-dom';
 
 @themr('RoomLobbyModal', defaultTheme)
 class RoomLobbyModal extends Component {
@@ -16,6 +17,16 @@ class RoomLobbyModal extends Component {
       setupRound: PropTypes.func.isRequired
     }
     
+    /**
+     * Set focus on createTab when Modal opens
+     *
+     */
+    componentDidMount(){
+      setTimeout(() => {
+        ReactDOM.findDOMNode(this.refs.focus).focus();
+      }, 250);
+    }
+    
     renderPlayers = (players) => {
       return players.map((value, index) => this.renderAvatar(index, value.avatar, value.name, value.bot === true));
     }
@@ -24,18 +35,19 @@ class RoomLobbyModal extends Component {
       const { theme, kickPlayer } = this.props;
       if(bot){
         return (
-          <div className={theme.avatarContainer} key={`avatar_${index}`}>
+          <div className={theme.avatarContainer} key={`avatar_${index}`} aria-label={`${name}'s Avatar`}>
             <Avatar index={avatar} />
             <Button icon="close" floating accent mini aria-label={`Remove ${name}`}
               className={theme.remove} onClick={()=>kickPlayer(index, true)}/>
-            <div>{`Ai: ${name}`}</div>
+            <div aria-hidden="true">{`Ai: ${name}`}</div>
           </div>
         );
       }
+      const label = name === 'Empty Slot' ? name : 'Your Avatar';
       return (
-        <div className={theme.avatarContainer} key={`avatar_${index}`}>
+        <div className={theme.avatarContainer} key={`avatar_${index}`} aria-label={label}>
           <Avatar index={avatar}/>
-          <div>{name}</div>
+          <div aria-hidden="true">{name}</div>
         </div>
       );
     }
@@ -44,9 +56,9 @@ class RoomLobbyModal extends Component {
       const { theme, addBot, setupRound, players } = this.props;
       const ready = find(players, {name: 'Empty Slot'}) != undefined;
       return (
-        <div className={theme.page}>
-          <div className={theme.dialog}>
-            <small>Play with bots or invite friends :</small>
+        <div className={theme.page} role="application">
+          <div className={theme.dialog} role="dialog" aria-labelledby="roomLobbyDialogTitle">
+            <small id="roomLobbyDialogTitle" ref="focus">Play with bots or invite friends :</small>
             <div className={theme.avatars}>
               {this.renderPlayers(players)}
             </div>

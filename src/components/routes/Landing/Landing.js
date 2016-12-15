@@ -35,7 +35,7 @@ class Landing extends Component {
       const { loggingIn } = this.state;
       return (
         <Panel>
-          <div className={theme.page}>
+          <div className={theme.page} role="application">
             <LoginModal open={!loggingIn} name={me.name} avatar={me.avatar} onDone={this.handleOnDone}/>
             <RoomCreateModal open={loggingIn} players={players} router={router}/>
           </div>

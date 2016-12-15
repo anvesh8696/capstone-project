@@ -25,6 +25,27 @@ export function getSelectedCards(cards, pile) {
 export function getPileCards(cards, pile) {
   return filter(cards, {'pile': pile});
 }
+  
+export function markLastInPile(cards, pileID){
+  let pileCards = getPileCards(cards, pileID);
+  let lastPileCard = pileCards[pileCards.length - 1];
+  
+  // set lastInPile for pile
+  if(lastPileCard){
+    /*
+    each(cards, (c, i) => {
+      if(c.pile === pileID){
+        console.log(c.pile, pileID, c.key, lastPileCard.key)
+        c = c.set('lastInPile', c.key === lastPileCard.key);
+        //cards.set(i, c.set('lastInPile', c.key === lastPileCard.key));
+      }
+    });
+    */
+    cards = cards.map((c) => c.pile === pileID ? c.set('lastInPile', c.key === lastPileCard.key) : c);
+  }
+  //console.table(cards)
+  return cards;
+}
 
 export function getLastDiscard(cards, pileDefs) {
   let prevCard = getPileCards(cards, getDiscardPileIndex(pileDefs));

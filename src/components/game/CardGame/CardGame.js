@@ -1,17 +1,15 @@
-import React, { Component, PropTypes, findDOMNode } from 'react';
-import ReactDOM from 'react-dom';
-import { findIndex } from 'lodash';
+import React, { Component, PropTypes } from 'react';
 import { themr } from 'react-css-themr';
 import defaultTheme from './CardGame.scss';
 import Deck from 'components/Deck/Deck';
-import deckTheme from 'components/Deck/Deck.scss';
 import PlayerButtonBar from 'components/PlayerButtonBar';
-import { cardIndex, isCardInPile, updateCards, addCardsToPile, addDrawCardToPile } from 'utils/PileUtil';
-import { find } from 'lodash';
+import { isCardInPile, updateCards, addCardsToPile, addDrawCardToPile } from 'utils/PileUtil';
+import { find, findIndex } from 'lodash';
 import PlayerAvatars from 'components/PlayerAvatars';
 import { getPlayerIndex, isPlayerTurn } from 'utils/RoomUtil';
-import { updateCard, getDrawPileIndex, getDiscardPileIndex, getLastDiscard, getSelectedCards } from 'utils/GameUtil';
+import { updateCard, getDiscardPileIndex, getLastDiscard, getSelectedCards, markLastInPile, getDrawPileIndex } from 'utils/GameUtil';
 import GameOverModal from 'components/ui/modal/GameOverModal';
+import ActionList from 'components/ui/list/ActionList';
 
 @themr('CardGame', defaultTheme)
 class CardGame extends Component {
@@ -74,14 +72,23 @@ class CardGame extends Component {
             }
           }
           */
-    console.log(event, card);
+    const c = event.keyCode;
+    
+    // Enter : selects and submits the card if card matches 
+    if(c == 13){
+      if(!card.selected){
+        this.handleCardClick(card);
+      }
+      setTimeout(this.handleDone, 100);
+    }
   }
   
   handleDeckUpdate = (msg) => {
+    const { mergeGame, updateGame } = this.props;
     if(msg.type === 'merge'){
-      this.props.mergeGame(msg.data);
+      mergeGame(msg.data);
     }else if(msg.type === 'update'){
-      this.props.updateGame(msg.keys, msg.data);
+      updateGame(msg.keys, msg.data);
     }
   }
   
@@ -92,8 +99,15 @@ class CardGame extends Component {
     
     if(isPlayerTurn(this.props.room, id)){
       let playerPile = getPlayerIndex(this.props.room.players, id);
+      let drawPile = getDrawPileIndex(pileDefs);
       
       cards = addDrawCardToPile(cards, piles, pileDefs, playerPile, false);
+      
+      // mark last card in discard pile
+      cards = markLastInPile(cards, drawPile);
+      
+      // mark last card in player hand
+      cards = markLastInPile(cards, playerPile);
       
       // make sure player cards are unselected
       cards = cards.map((c) => c.pile == playerPile ? c.merge({selected: false}) : c);
@@ -114,9 +128,17 @@ class CardGame extends Component {
       let selected = getSelectedCards(cards, pile);
       let discard = getDiscardPileIndex(pileDefs);
       
-      cards = addCardsToPile(cards, selected, discard, false, true);
-      
       if(selected.length > 0){
+        
+        // add selected card to discard pile
+        cards = addCardsToPile(cards, selected, discard, false, true);
+        
+        // mark last card in discard pile
+        cards = markLastInPile(cards, discard);
+        
+        // mark last card in player hand
+        cards = markLastInPile(cards, pile);
+        
         cards = updateCards(piles, cards, pile, this.props.room.players.length);
         this.props.updateGame(['game', 'cards'], cards);
         this.props.playerTurnEnd(id);
@@ -127,15 +149,16 @@ class CardGame extends Component {
   render() {
     const { theme, game, room, onDone } = this.props;
     const { cards } = game;
-    const { players, winner } = this.props.room;
+    const { players, winner, actions } = this.props.room;
     const { id } = this.props.me;
     const { playerTurn } = room;
     const playerIndex = getPlayerIndex(players, id);
     const playerTurnIndex = getPlayerIndex(players, playerTurn);
     const disableDone = find(cards, {selected: true}) === undefined;
     return (
-      <div className={theme.page}>
+      <div className={theme.page} role="application">
         <GameOverModal open={room.isGameOver} winner={winner} onDone={onDone}/>
+        <ActionList actions={actions} />
         <PlayerAvatars players={players} playerIndex={playerIndex} playerTurnIndex={playerTurnIndex} />
         <PlayerButtonBar disableDone={disableDone} onDraw={this.handleDraw} onDone={this.handleDone}/>
         <Deck ref="deck"

@@ -17,11 +17,11 @@ const persistedStore = function () {
   return d ? JSON.parse(d) : { users:[] };
 };
 
-export const createUser = function (username) {
+export const createUser = function (username='sarahconnor', avatar=0) {
   return {
     id: uuid(),
-    name: username || 'sarahconnor',
-    avatar: 5
+    name: username,
+    avatar: avatar
   };
 };
 
