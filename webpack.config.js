@@ -114,6 +114,8 @@ if(ENV === 'production') {
 		}),
     new copy([
       { from: path.resolve(SRC_PATH, 'index.html'), to: path.resolve(DIST_PATH, 'index.html') },
+      { from: path.resolve(SRC_PATH, 'manifest.json'), to: path.resolve(DIST_PATH, 'manifest.json') },
+      { from: path.resolve(SRC_PATH, 'favicon.ico'), to: path.resolve(DIST_PATH, 'favicon.ico') },
       { from: 'static', to:'static' }
     ])
   ]
@@ -125,6 +127,8 @@ if(ENV === 'production') {
     new webpack.NoErrorsPlugin(),
     new copy([
       { from: path.resolve(SRC_PATH, 'index.html'), to: path.resolve(DIST_PATH, 'index.html') },
+      { from: path.resolve(SRC_PATH, 'manifest.json'), to: path.resolve(DIST_PATH, 'manifest.json') },
+      { from: path.resolve(SRC_PATH, 'favicon.ico'), to: path.resolve(DIST_PATH, 'favicon.ico') },
       { from: 'static', to:'static' }
     ])
   ];

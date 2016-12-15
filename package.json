@@ -6,7 +6,9 @@
   "scripts": {
     "start": "NODE_ENV=development webpack-dev-server --progress --colors",
     "live": "npm run start",
-    "build": "NODE_ENV=production & webpack --config webpack.config.js --progress --profile --colors",
+    "build": "build:app && build:sw",
+    "build:app": "NODE_ENV=production & webpack --config webpack.config.js --progress --profile --colors",
+    "build:sw": " sw-precache --config=sw-precache-config.js",
     "lint": "eslint .",
     "test": "karma start --single-run --no-auto-watch karma.config.js",
     "test:watch": "karma start --auto-watch --no-single-run karma.config.js",
@@ -29,7 +31,7 @@
   "bugs": {
     "url": "https://github.com/jdbence/capstone-project/issues"
   },
-  "homepage": "https://github.com/jdbence/capstone-project#readme",
+  "homepage": "./",
   "devDependencies": {
     "babel-core": "^6.0.0",
     "babel-eslint": "^7.1.1",
@@ -100,6 +102,7 @@
     "stylelint-config-css-modules": "^0.1.0",
     "stylelint-config-standard": "^15.0.0",
     "svg-react-loader": "^0.3.7",
+    "sw-precache": "^4.2.3",
     "webpack": "^1.12.2",
     "webpack-cleanup-plugin": "^0.4.1",
     "webpack-dev-server": "^1.12.0"
