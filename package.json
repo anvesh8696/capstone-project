@@ -6,7 +6,7 @@
   "scripts": {
     "start": "NODE_ENV=development webpack-dev-server --progress --colors",
     "live": "npm run start",
-    "build": "build:app && build:sw",
+    "build": "npm run build:app && npm run build:sw",
     "build:app": "NODE_ENV=production & webpack --config webpack.config.js --progress --profile --colors",
     "build:sw": " sw-precache --config=sw-precache-config.js",
     "lint": "eslint .",
