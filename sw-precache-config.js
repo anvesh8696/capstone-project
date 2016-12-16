@@ -1,10 +1,10 @@
 module.exports = {
-  "stripPrefix": "dist/",
-  "staticFileGlobs": [
-    "dist/*.html",
-    "dist/manifest.json",
-    "dist/static/**/!(*map*)"
+  'stripPrefix': 'dist/',
+  'staticFileGlobs': [
+    'dist/*.html',
+    'dist/manifest.json',
+    'dist/static/**/!(*map*)'
   ],
-  "dontCacheBustUrlsMatching": /\.\w{8}\./,
-  "swFilePath": "dist/service-worker.js"
-}
+  'dontCacheBustUrlsMatching': /\.\w{8}\./,
+  'swFilePath': 'dist/service-worker.js'
+};

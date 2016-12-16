@@ -23,7 +23,9 @@ class CardGame extends Component {
     updateGame: PropTypes.func.isRequired,
     mergeGame: PropTypes.func.isRequired,
     playerTurnEnd: PropTypes.func.isRequired,
-    onDone: PropTypes.func.isRequired
+    onDone: PropTypes.func.isRequired,
+    onCloseHelp: PropTypes.func.isRequired,
+    helpOpen: PropTypes.bool.isRequired
   }
   
   handleCardClick = (card) => {
@@ -147,7 +149,7 @@ class CardGame extends Component {
   }
 
   render() {
-    const { theme, game, room, onDone } = this.props;
+    const { theme, game, room, onDone, onCloseHelp, helpOpen } = this.props;
     const { cards } = game;
     const { players, winner, actions } = this.props.room;
     const { id } = this.props.me;
@@ -155,6 +157,7 @@ class CardGame extends Component {
     const playerIndex = getPlayerIndex(players, id);
     const playerTurnIndex = getPlayerIndex(players, playerTurn);
     const disableDone = find(cards, {selected: true}) === undefined;
+    
     return (
       <div className={theme.page} role="application">
         <GameOverModal open={room.isGameOver} winner={winner} onDone={onDone}/>

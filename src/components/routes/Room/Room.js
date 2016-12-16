@@ -1,10 +1,12 @@
 import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
-import { AppBar, Panel } from 'react-toolbox/components/index.js';
+import { AppBar, Panel, Navigation } from 'react-toolbox/components/index.js';
 import { themr } from 'react-css-themr';
 import defaultTheme from './Room.scss';
 import CardGame from 'components/game/CardGame';
 import RoomLobbyModal from 'components/ui/modal/RoomLobbyModal';
+import { Button } from 'react-toolbox/components/button';
+import HelpModal from 'components/ui/modal/HelpModal';
 
 @themr('Room', defaultTheme)
 class Room extends Component {
@@ -26,6 +28,10 @@ class Room extends Component {
     }).isRequired
   }
   
+  state = {
+    helpOpen: false
+  }
+  
   componentDidMount() {
     const { params } = this.props;
     this.props.setupRoom(params.roomID);
@@ -35,8 +41,13 @@ class Room extends Component {
     this.props.router.push('/');
   }
   
+  handleToggleHelp = () => {
+    this.setState({...this.state, helpOpen:!this.state.helpOpen});
+  }
+  
   renderPage = (status, players) => {
     const { kickPlayer, addBot, setupRound } = this.props;
+    const { helpOpen } = this.state;
     if(status === 'WAITING'){
       return (
         <RoomLobbyModal
@@ -48,16 +59,25 @@ class Room extends Component {
       );
     }
     return (
-      <CardGame ref="game" {...this.props} onDone={this.handleOnDone}/>
+      <CardGame ref="game" {...this.props}
+        onDone={this.handleOnDone}
+        helpOpen={helpOpen}
+      />
     );
   }
 
   render() {
-    const { params, room } = this.props;
+    const { params, room, theme } = this.props;
+    const { helpOpen } = this.state;
     return (
       <Panel>
-        <AppBar flat title={`Room: ${params.roomID}`}/>
+        <AppBar flat title={`Room: ${params.roomID}`} >
+          <Navigation type="horizontal">
+            <Button icon="live_help" inverse onClick={this.handleToggleHelp}>Help</Button>
+          </Navigation>
+        </AppBar>
         { this.renderPage(room.status, room.players) }
+        <HelpModal open={helpOpen} onDone={this.handleToggleHelp}/>
       </Panel>
     );
   }

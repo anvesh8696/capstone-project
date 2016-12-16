@@ -23,6 +23,7 @@ export const USER_LOGIN = 'USER_LOGIN';
 export const KICK_PLAYER = 'KICK_PLAYER';
 export const ADD_BOT = 'ADD_BOT';
 export const RECORD_ACTION = 'RECORD_ACTION';
+export const MODE_CHANGED = 'MODE_CHANGED';
 
 // REMOTE
 export const ROOM_CHECK_READY = 'ROOM_CHECK_READY';
@@ -51,6 +52,7 @@ export const replenishDrawPile = createAction(REPLENISH_DRAW_PILE);
 export const kickPlayer = createAction(KICK_PLAYER);
 export const addBot = createAction(ADD_BOT);
 export const recordActionSuccess = createAction(`${RECORD_ACTION}_SUCCESS`);
+export const modeChanged = createAction(MODE_CHANGED);
 
 // ------------------------------------
 // ASYNC Actions
@@ -93,7 +95,8 @@ export function setupRound() {
       //players: players,
       isGameOver: false,
       status: 'STARTED',
-      winner: ''
+      winner: '',
+      actions: []
     });
     let nGame = generateGame(deckID, deal, teamMode, players, me.id);
     
@@ -150,7 +153,7 @@ export function playerTurnEnd(playerID) {
     
       // bot control
       if(isBot(players, nextPlayerID)){
-        setTimeout(() => think(dispatch, getState, nextPlayerID), 2000 * random(1,2));
+        setTimeout(() => think(dispatch, getState, nextPlayerID), 1000 * random(2,4));
       }
     }
   };
@@ -337,7 +340,8 @@ export const flowReducer = handleActions({
   [USER_LOGIN]: (state, action) => handleUserLogin(state, action.payload.name, action.payload.avatar),
   [KICK_PLAYER]: (state, action) => handleKickPlayer(state, action.payload.index, action.payload.bot),
   [ADD_BOT]: (state, action) => handleAddBot(state),
-  [`${RECORD_ACTION}_SUCCESS`]: (state, action) => state.setIn(['room','actions'], action.payload)
+  [`${RECORD_ACTION}_SUCCESS`]: (state, action) => state.setIn(['room','actions'], action.payload),
+  [MODE_CHANGED]: (state, action) => state.setIn(['room','teamMode'], action.payload === 0 ? '2V2' : 'F4A')
 }, initialState);
 
 export default flowReducer;

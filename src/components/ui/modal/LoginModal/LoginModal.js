@@ -59,7 +59,7 @@ class LoginModal extends Component {
         <Dialog active={open} theme={theme}>
           <div className={theme.dialogContent}>
             <h3 id={ariakey}>Who are you?</h3>
-            <AvatarPicker ariakey={ariakey} botToggle={false} value={avatar} onChange={this.handleAvatarChange}/>
+            <AvatarPicker ariakey={ariakey} value={avatar} onChange={this.handleAvatarChange}/>
             <Input
               type="text"
               label="Your UserName"

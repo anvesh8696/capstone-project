@@ -18,7 +18,9 @@ class Landing extends Component {
       }).isRequired,
       userLogin: PropTypes.func.isRequired,
       me: PropTypes.object.isRequired,
-      players: PropTypes.array.isRequired
+      players: PropTypes.array.isRequired,
+      modeIndex: PropTypes.number.isRequired,
+      onModeClick: PropTypes.func.isRequired
     }
     
     state = {
@@ -31,13 +33,13 @@ class Landing extends Component {
     }
   
     render() {
-      const { theme, router, me, players } = this.props;
+      const { theme, router, me, players, modeIndex, onModeClick } = this.props;
       const { loggingIn } = this.state;
       return (
         <Panel>
           <div className={theme.page} role="application">
             <LoginModal open={!loggingIn} name={me.name} avatar={me.avatar} onDone={this.handleOnDone}/>
-            <RoomCreateModal open={loggingIn} players={players} router={router}/>
+            <RoomCreateModal open={loggingIn} players={players} router={router} modeIndex={modeIndex} onModeClick={onModeClick}/>
           </div>
         </Panel>
       );

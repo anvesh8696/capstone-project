@@ -20,14 +20,15 @@ class RoomCreateModal extends Component {
       open: PropTypes.bool.isRequired,
       router: PropTypes.shape({
         push: PropTypes.func.isRequired
-      }).isRequired
+      }).isRequired,
+      modeIndex: PropTypes.number.isRequired,
+      onModeClick: PropTypes.func.isRequired
     }
     
     state = {
       code: '',
       codeError: '',
-      index: 0,
-      modeIndex: 0
+      index: 0
     }
     
     /**
@@ -80,12 +81,8 @@ class RoomCreateModal extends Component {
       this.setState({...this.state, [field]: value});
     };
     
-    handleModeClick = (index) => {
-      this.setState({...this.state, modeIndex: index});
-    }
-    
     renderM = (ModeSVG, mode, desc, index, selectedIndex, ariakey) => {
-      const { theme } = this.props;
+      const { theme, onModeClick } = this.props;
       const aria = {
         'role': 'radio',
         'tabIndex': index === selectedIndex ? 0 : -1
@@ -95,7 +92,7 @@ class RoomCreateModal extends Component {
         index === selectedIndex ? theme.modeSelected : ''
       );
       return (
-        <div key={`mode_${index}`} className={modeClasses} {...aria} onClick={() => this.handleModeClick(index)}>
+        <div key={`mode_${index}`} className={modeClasses} {...aria} onClick={() => onModeClick(index)}>
           <ModeSVG className={theme.notouch} width={200} height={200} role="presentation" aria-hidden="true"/>
           <div>
             {mode}
@@ -106,8 +103,7 @@ class RoomCreateModal extends Component {
     }
     
     renderModes = (ariakey) => {
-      const { theme } = this.props;
-      const { modeIndex } = this.state;
+      const { theme, modeIndex } = this.props;
       const aria = {
         'role': 'radiogroup',
         'aria-labelledby': ariakey
